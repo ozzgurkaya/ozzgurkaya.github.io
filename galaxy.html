@@ -1,0 +1,1382 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>YoungScientisTED - Milky Way Galaxy</title>
+<script src="https://web.wwtassets.org/engine/7/wwtsdk.js"></script>
+<style>
+:root{--ink:#e6ecff;--muted:#9bb0d3;--panel:#0f1420;--ring:#8ab6ff;--ring2:#3aa3ff}
+html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+#wwtcanvas{position:fixed;inset:0;background:#000}
+
+/* ÜST HUD */
+.hud{position:fixed;left:16px;top:16px;display:flex;gap:10px;align-items:center;z-index:5;
+  background:linear-gradient(180deg,rgba(7,10,18,.88),rgba(7,10,18,.55));border:1px solid rgba(124,197,255,.25);
+  border-radius:14px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.hud h1{margin:0;font-size:14px;color:var(--muted);letter-spacing:.3px}
+.hud button{appearance:none;border:1px solid rgba(124,197,255,.25);background:var(--panel);color:var(--ink);
+  padding:8px 10px;border-radius:10px;font-weight:600;cursor:pointer}
+
+/* ALT SOL: Liste paneli */
+#panel{
+  position:fixed;left:16px;bottom:16px;z-index:6;width:min(460px,calc(100vw - 32px));
+  background:linear-gradient(180deg,rgba(10,14,24,.92),rgba(10,14,24,.86));
+  border:1px solid rgba(124,197,255,.25);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);
+  max-height:40svh;overflow:auto;padding:10px 12px
+}
+#panel h2{margin:0 0 8px;font-size:14px;color:#bcd2ff}
+#search{width:100%;padding:8px 10px;border-radius:10px;border:1px solid rgba(124,197,255,.25);background:#0b1120;color:#e6ecff}
+#list{margin-top:8px;display:grid;gap:6px}
+.item{display:flex;align-items:center;gap:8px}
+.item button{border:1px solid rgba(124,197,255,.25);background:#0b1120;color:#e6ecff;border-radius:10px;padding:6px 8px;cursor:pointer}
+.badge{font-size:11px;color:#9bb0d3}
+
+/* HER NESNE İÇİN AYRI YUVARLAK — M42 ile birebir stil/animasyon */
+.astro-btn{
+  position:fixed;left:-9999px;top:-9999px;z-index:6;width:22px;height:22px;border-radius:999px;cursor:pointer;
+  background:radial-gradient(closest-side,#b9d6ff,#639cff 65%, #1b2a52);
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 0 24px #6fb3ffaa, 0 0 48px #6fb3ff44, inset 0 0 8px #ffffff55;
+}
+.astro-btn::after{
+  content:""; position:absolute; inset:-8px; border-radius:50%;
+  border:1px solid var(--ring); box-shadow:0 0 10px var(--ring2);
+  animation:pulse 2.4s ease-out infinite;
+}
+@keyframes pulse{0%{transform:scale(.5);opacity:.8}100%{transform:scale(1.6);opacity:0}}
+
+/* POP-OUT (sağ üst, TAŞMA KORUMALI) — M42’deki davranış */
+#popup{
+  position:fixed;
+  right:calc(max(12px,env(safe-area-inset-right)));
+  top:calc(max(12px,env(safe-area-inset-top))+60px);
+  z-index:7;display:none;width:min(440px,calc(100vw - 2*max(12px,env(safe-area-inset-right)) - 16px));
+  min-width:min(320px,calc(100vw - 2*max(12px,env(safe-area-inset-right)) - 16px));
+  max-height:calc(100svh - (max(12px,env(safe-area-inset-top))+60px) - max(12px,env(safe-area-inset-bottom)) - 12px);
+  overflow:auto;-webkit-overflow-scrolling:touch;backdrop-filter:blur(4px);
+  background:radial-gradient(120% 120% at 20% 0%,rgba(16,24,40,.95),rgba(10,14,22,.92));
+  border:1px solid rgba(124,197,255,.25);border-radius:16px;padding:14px;box-shadow:0 16px 46px rgba(0,0,0,.5)
+}
+#popup.visible{display:block}
+#popup h3{margin:0 0 8px;font-size:16px}
+#popup p{margin:8px 0 0;color:#cfe1ff}
+#popup .close{position:sticky;top:0;float:right;margin:-6px -2px 6px 0;background:#0000;border:0;color:#c8d8ff;font-size:18px;cursor:pointer}
+#img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid rgba(124,197,255,.25);margin-top:8px;max-height:min(46svh,360px);object-fit:contain}
+#credit{margin-top:6px;font-size:12px;color:#9fb4d6}
+#credit a{color:#bfe0ff;text-decoration:none;border-bottom:1px dotted rgba(191,224,255,.6)}
+@media (max-width:640px){#popup{width:min(92vw, 440px);padding:12px}.hud{transform:scale(.96);transform-origin:left top}}
+@media (max-height:460px){#popup h3{font-size:15px}#popup{padding:10px;border-radius:12px}}
+</style>
+</head>
+<body>
+<div id="wwtcanvas" aria-label="WorldWide Telescope Sky"></div>
+
+<!-- ÜST HUD -->
+<div class="hud" role="toolbar">
+  <h1>Milky Way — Gaia</h1>
+  <button id="resetView" title="General View">General View</button>
+</div>
+
+<!-- ALT SOL: Nesne listesi -->
+<div id="panel" role="region" aria-label="Gök cismi listesi">
+  <h2>Object List (click → focus)</h2>
+  <input id="search" type="search" placeholder="Ara: M42, Andromeda, nebula..." />
+  <div id="list"></div>
+</div>
+
+<!-- SAĞ ÜST: Pop-out -->
+<div id="popup" role="dialog" aria-live="polite" aria-modal="false">
+  <button class="close" id="closePopup" aria-label="Kapat">×</button>
+  <h3 id="title">Selected Object</h3>
+  <img id="img" alt="Nesne görseli" loading="lazy" />
+  <p id="info"></p>
+  <div id="credit"></div>
+</div>
+
+<script>
+/* ================================
+   1) NESNE LİSTESİ — sadece POZİSYONLAR düzeltildi
+   (RA saat, Dec derece; ekvatoryal J2000)
+================================== */
+const OBJECTS = [
+  {
+    id:"m42",
+    name:"M42 (Orion Nebula)",
+    type:"Nebula",
+    ra_hours:5.588138889,   // 5h35m17s
+    dec_deg:-5.391111111,   // -5°23′28″
+    zoom:8,
+    img_url:"https://svs.gsfc.nasa.gov/vis/a030000/a030900/a030947/orion_nebula-hst-9000x9000_print.jpg",
+    info:"A large H II region and the brightest part of the Orion Molecular Cloud Complex. NASA’s Hubble and JWST have imaged young stars and protoplanetary disks.",
+    credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://svs.gsfc.nasa.gov/30947/",
+    more_link:"https://images.nasa.gov/search?q=M42%20(Orion%20Bulutsusu)&media_type=image",
+    tags:["HII","star-forming","Orion"]
+  },
+
+  /* ——— YALNIZCA KOORDİNATLAR DÜZELTİLDİ ——— */
+  { id:"m8", name:"M8 (Lagoon Nebula)", type:"Nebula",
+    ra_hours:18.0603,  dec_deg:-24.383, zoom:10,
+    img_url:"https://svs.gsfc.nasa.gov/vis/a030000/a030700/a030775/orion_nebula_vis_ir-hst_sst-3240x3240_print.jpg",
+    info:"A vast emission nebula where star formation continues. Hubble images clearly show the pillars and shock fronts carved by ionized gas. Near-UV and optical data illustrate how newborn massive stars shape their environment.", credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://www.nasa.gov/image-article/lagoon-nebula-undersea-world/", more_link:"https://images.nasa.gov/search?q=Lagoon%20Nebula&media_type=image", tags:["HII"] },
+
+  { id:"m17", name:"M17 (Omega/Swan Nebula)", type:"Nebula",
+    ra_hours:18.3406,  dec_deg:-16.1767, zoom:12,
+    img_url:"", info:"A stellar nursery glowing with hot, ionized hydrogen. NASA observations show stellar winds creating bubbles and carving the gas. This structure serves as a laboratory to understand how feedback regulates the galactic environment.",
+    credit_text:"NASA/ESA — Hubble", credit_link:"https://esahubble.org/images/heic0206g/",
+    more_link:"https://images.nasa.gov/search?q=Omega%20Nebula%20M17&media_type=image", tags:["HII"] },
+
+  { id:"m16", name:"M16 (Eagle Nebula)", type:"Nebula",
+    ra_hours:18.3133,  dec_deg:-13.8067, zoom:12,
+    img_url:"https://cdn.esahubble.org/archives/images/large/heic1501a.jpg",
+    info:"Famous for its “Pillars of Creation.” Hubble and JWST reveal star seeds hidden within dense knots inside the pillars. X-ray and infrared data show that energetic radiation from young stars evaporates the gas.", credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://esahubble.org/images/heic1501a/", more_link:"https://images.nasa.gov/search?q=Pillars%20of%20Creation%20M16&media_type=image", tags:["HII"] },
+
+  { id:"m20", name:"M20 (Trifid Nebula)", type:"Nebula",
+    ra_hours:18.0397,  dec_deg:-23.03, zoom:11,
+    img_url:"https://cdn.esahubble.org/archives/images/large/opo9909a.jpg",
+    info:"A rare system combining emission, reflection, and dark nebula components. Hubble images show dust lanes dividing starlight into fragments. Multi-wavelength views reveal the nebula’s layered structure.", credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://science.nasa.gov/asset/hubble/trifid-nebula-messier-20ngc-6514/",
+    more_link:"https://images.nasa.gov/search?q=Trifid%20Nebula%20M20&media_type=image", tags:["HII"] },
+
+  { id:"m78", name:"M78", type:"Nebula",
+    ra_hours:5.7792,   dec_deg:0.05, zoom:10,
+    img_url:"https://cdn.spacetelescope.org/archives/images/large/opo0001a.jpg",
+    info:"A bright reflection nebula in the Orion region. NASA’s infrared observations detect embedded young stars hidden in seemingly dark cores. Starlight scattered by dust gives the nebula a bluish glow.", credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-78/",
+    more_link:"https://images.nasa.gov/search?q=M78%20reflection%20nebula&media_type=image", tags:["Reflection"] },
+
+  { id:"m31", name:"M31 (Andromeda Galaxy)", type:"Galaxy",
+    ra_hours:0.7123,   dec_deg:41.2692, zoom:10,
+    img_url:"", info:"Largest spiral in the Local Group.", credit_text:"", credit_link:"", more_link:"", tags:["Spiral","LocalGroup"] },
+
+  { id:"m57", name:"M57 (Ring Nebula)", type:"Nebula",
+    ra_hours:18.893,   dec_deg:33.028, zoom:12,
+    img_url:"", info:"Famous for its ring-like appearance of ionized gas. Hubble and spectroscopy reveal how stellar winds shaped its shell. Near-infrared shows faint outer extensions beyond the visible ring.", credit_text:"", credit_link:"", more_link:"", tags:["Planetary"] },
+
+  { id:"ngc7000", name:"NGC 7000 (North America Nebula)", type:"Nebula",
+    ra_hours:20.9817, dec_deg:44.333, zoom:10,
+    img_url:"https://cdn.esahubble.org/archives/images/large/opo0225g.jpg",
+    info:"A large H II region shaped like the continent. NASA mosaics map different density and temperature layers. Nearby young clusters carve the nebula with radiation, triggering new star formation.", credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-20/",
+    more_link:"https://images.nasa.gov/search?q=NGC%207000%20North%20America%20Nebula&media_type=image", tags:["HII"] },
+
+  { id:"ic5070", name:"IC 5070 (Pelican Nebula)", type:"Nebula",
+    ra_hours:20.8467, dec_deg:44.35, zoom:10,
+    img_url:"https://apod.nasa.gov/apod/image/1909/PelicanNebula_SHO_1920.jpg",
+    info:"A star-forming region adjacent to the North America Nebula. Hubble and ground-based data together show newborn stars at the tips of gas pillars. Edge ionization fronts display how UV radiation sculpts molecular clouds.", credit_text:"NASA/ESA — Hubble (APOD)",
+    credit_link:"https://apod.nasa.gov/apod/ap190925.html",
+    more_link:"https://images.nasa.gov/search?q=IC%205070%20Pelican%20Nebula&media_type=image", tags:["HII"] },
+
+  { id:"ngc1499", name:"NGC 1499 (California Nebula)", type:"Nebula",
+    ra_hours:4.0539,   dec_deg:36.4167, zoom:11,
+    img_url:"https://www.nasa.gov/wp-content/uploads/2023/06/california_nebula_wise.jpg",
+    info:"An elongated emission nebula. NASA wide-field data trace faint hydrogen gas. UV light from nearby hot stars illuminates the nebula.", credit_text:"NASA",
+    credit_link:"https://science.nasa.gov/image-article/california-nebula/",
+    more_link:"https://images.nasa.gov/search?q=NGC%201499%20California%20Nebula&media_type=image", tags:["HII"] },
+
+  { id:"rosette", name:"NGC 2237/38/44 (Rosette Nebula)", type:"Nebula",
+    ra_hours:6.5320,   dec_deg:4.933, zoom:11,
+    img_url:"https://cdn.spacetelescope.org/archives/images/large/opo9919a.jpg",
+    info:"A ring-shaped H II region carved by its central open cluster. Hubble and Spitzer images show sharp boundaries between inner bubble and outer shell. Numerous young stars are detected along dust pillars.", credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://www.nasa.gov/image-article/rosette-nebula/",
+    more_link:"https://images.nasa.gov/search?q=Rosette%20Nebula&media_type=image", tags:["HII","Cluster"] },
+
+  { id:"ngc3324", name:"NGC 3324 (Carina “Cosmic Cliffs”)", type:"Nebula",
+    ra_hours:10.6167, dec_deg:-58.6333, zoom:11,
+    img_url:"https://stsci-opo.org/STScI-01G77SMZSP8D7J8Y9XQX4SJTFZ.png",
+    info:"Famous as one of JWST’s first-light scenes. Near- and mid-infrared data reveal wave-like “cliff” edges of dust in high detail. The region illustrates how massive star feedback sculpts the environment.", credit_text:"NASA/ESA/CSA — JWST",
+    credit_link:"https://webbtelescope.org/contents/media/images/2022/031/01G77PKB8NKR7S8Z6HBXMYATGJ",
+    more_link:"https://images.nasa.gov/search?q=NGC%203324%20Cosmic%20Cliffs&media_type=image", tags:["StarForming"] },
+
+/* === YENİ NESNELER — EKLE/APPEND === */
+{
+  id:"ngc3372",
+  name:"NGC 3372 (Carina Nebula)",
+  type:"Nebula",
+  ra_hours:10.752222,   // 10h45m08s
+  dec_deg:-59.866667,   // -59°52′
+  zoom:9,
+  img_url:"",
+  info:"A giant star nursery hosting massive stars like Eta Carinae. Hubble shows dust pillars, wind-blown bubbles, and ionization fronts.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/image/carina-nebula/",
+  more_link:"https://images.nasa.gov/search?q=NGC%203372%20Carina%20Nebula&media_type=image",
+  tags:["HII","StarForming","Carina"]
+},
+{
+  id:"ngc3603",
+  name:"NGC 3603",
+  type:"Nebula",
+  ra_hours:11.251944,   // 11h15m07s
+  dec_deg:-61.266667,   // -61°16′
+  zoom:11,
+  img_url:"",
+  info:"Hosts one of the most massive young star clusters in the Milky Way. Winds and shocks carve cavities in the surrounding gas.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/potw1335a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%203603&media_type=image",
+  tags:["Cluster","HII","Feedback"]
+},
+{
+  id:"ngc6334",
+  name:"NGC 6334 (Cat’s Paw Nebula)",
+  type:"Nebula",
+  ra_hours:17.347222,   // 17h20m50s
+  dec_deg:-36.100000,   // -36°06′
+  zoom:10,
+  img_url:"",
+  info:"Massive star-forming complex with bright near-IR knots. Spitzer/JWST reveal embedded nurseries and filamentary structure.",
+  credit_text:"NASA/ESA/CSA",
+  credit_link:"https://www.nasa.gov/image-article/cats-paw-nebula/",
+  more_link:"https://images.nasa.gov/search?q=NGC%206334%20Cat%E2%80%99s%20Paw&media_type=image",
+  tags:["HII","Infrared","Filaments"]
+},
+{
+  id:"ngc6357",
+  name:"NGC 6357 (Lobster Nebula)",
+  type:"Nebula",
+  ra_hours:17.411944,   // 17h24m43s
+  dec_deg:-34.200000,   // -34°12′
+  zoom:10,
+  img_url:"",
+  info:"Filled with bubbles carved by young hot stars. Central clusters emit strong UV that photo-evaporates gas.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/potw1725a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%206357%20Lobster%20Nebula&media_type=image",
+  tags:["HII","Bubbles","UV"]
+},
+{
+  id:"horsehead_region",
+  name:"IC 434 & Barnard 33 (Horsehead Region)",
+  type:"Region",
+  ra_hours:5.683333,    // 5h41m00s
+  dec_deg:-2.450000,    // -2°27′
+  zoom:11,
+  img_url:"",
+  info:"Horsehead appears in silhouette against bright H II. Near-IR imaging uncovers dense cores inside the column.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-49/",
+  more_link:"https://images.nasa.gov/search?q=Horsehead%20Nebula%20IC%20434%20B33&media_type=image",
+  tags:["DarkNebula","Orion","B33"]
+},
+{
+  id:"ic1805",
+  name:"IC 1805 (Heart Nebula)",
+  type:"Nebula",
+  ra_hours:2.545000,    // 2h32m42s
+  dec_deg:61.450000,    // +61°27′
+  zoom:10,
+  img_url:"",
+  info:"Broad emission nebula with a central young cluster. UV radiation and winds sculpt wave-like gas forms.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/image/heart-nebula/",
+  more_link:"https://images.nasa.gov/search?q=IC%201805%20Heart%20Nebula&media_type=image",
+  tags:["HII","Cluster","Feedback"]
+},
+{
+  id:"ic1848",
+  name:"IC 1848 (Soul Nebula)",
+  type:"Nebula",
+  ra_hours:2.850000,    // 2h51m00s
+  dec_deg:60.433333,    // +60°26′
+  zoom:10,
+  img_url:"",
+  info:"Large H II complex neighboring the Heart. Infrared data reveal protostars embedded in dust.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/image/soul-nebula/",
+  more_link:"https://images.nasa.gov/search?q=IC%201848%20Soul%20Nebula&media_type=image",
+  tags:["HII","Protostars","HeartAndSoul"]
+},
+{
+  id:"ngc2174",
+  name:"NGC 2174 (Monkey Head Nebula)",
+  type:"Nebula",
+  ra_hours:6.150000,    // 6h09m00s
+  dec_deg:20.650000,    // +20°39′
+  zoom:11,
+  img_url:"",
+  info:"Reflection components and star-forming knots with glowing rims. Young stars sculpt pillar-like shapes.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/heic1406a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%202174%20Monkey%20Head&media_type=image",
+  tags:["Reflection","StarForming","Pillars"]
+},
+{
+  id:"ic1396",
+  name:"IC 1396 (Elephant Trunk Region)",
+  type:"Nebula",
+  ra_hours:21.650000,   // 21h39m00s
+  dec_deg:57.500000,    // +57°30′
+  zoom:10,
+  img_url:"",
+  info:"Dark elongated pillar within a large H II region. New stars form in the dense core at the tip.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://apod.nasa.gov/apod/ap100908.html",
+  more_link:"https://images.nasa.gov/search?q=IC%201396%20Elephant%20Trunk&media_type=image",
+  tags:["HII","Pillar","Protostars"]
+},
+{
+  id:"w51",
+  name:"W51 Complex",
+  type:"Complex",
+  ra_hours:19.383333,   // 19h23m00s
+  dec_deg:14.500000,    // +14°30′
+  zoom:10,
+  img_url:"",
+  info:"Giant star-forming region in the Galactic plane. IR data reveal embedded young stars and hot dust.",
+  credit_text:"NASA",
+  credit_link:"https://science.nasa.gov/mission/spitzer/w51/",
+  more_link:"https://images.nasa.gov/search?q=W51%20complex&media_type=image",
+  tags:["MassiveSFR","Infrared","GalacticPlane"]
+},
+{
+  id:"w3",
+  name:"W3 Complex",
+  type:"Complex",
+  ra_hours:2.416667,    // 2h25m00s
+  dec_deg:62.100000,    // +62°06′
+  zoom:10,
+  img_url:"",
+  info:"Active region in the Perseus arm; filaments lined with dense birth cores.",
+  credit_text:"NASA",
+  credit_link:"https://www.nasa.gov/image-article/w3-star-forming-region/",
+  more_link:"https://images.nasa.gov/search?q=W3%20star%20forming%20region&media_type=image",
+  tags:["Filaments","PerseusArm","Protostars"]
+},
+{
+  id:"w5",
+  name:"W5 (part of Soul Nebula)",
+  type:"Complex",
+  ra_hours:2.983333,    // 2h59m00s
+  dec_deg:60.450000,    // +60°27′
+  zoom:10,
+  img_url:"",
+  info:"Carved bubbles and ionization fronts; ‘hollow’ bubbles surrounded by new star births.",
+  credit_text:"NASA/Spitzer",
+  credit_link:"https://science.nasa.gov/mission/spitzer/soul-nebula-w5/",
+  more_link:"https://images.nasa.gov/search?q=W5%20nebula&media_type=image",
+  tags:["Bubbles","TriggeredSF","Spitzer"]
+},
+{
+  id:"rosette_mc",
+  name:"Rosette Molecular Cloud",
+  type:"Cloud",
+  ra_hours:6.550000,    // 6h33m00s
+  dec_deg:4.500000,     // +4°30′
+  zoom:9,
+  img_url:"",
+  info:"Surrounds the Rosette Nebula with a large gas reservoir. Radio/IR reveal interconnected filaments and young stars.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/image/rosette-nebula/",
+  more_link:"https://images.nasa.gov/search?q=Rosette%20Molecular%20Cloud&media_type=image",
+  tags:["MolecularCloud","Filaments","Rosette"]
+},
+
+/* === YENİ NESNELER — EKLE/APPEND === */
+{
+  id:"rho_oph",
+  name:"Rho Ophiuchi Cloud Complex",
+  type:"Nebula",
+  ra_hours:16.440000,   // ~16h26m
+  dec_deg:-24.383000,   // ~-24°23′
+  zoom:10,
+  img_url:"",
+  info:"One of the closest stellar nurseries to Earth. NASA infrared observations detect proto-stars hidden in dust. Its reddish glow reveals PAH emission and heated dust.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Rho%20Ophiuchi&media_type=image",
+  tags:["StarForming","Infrared","PAH"]
+},
+{
+  id:"m27",
+  name:"M27 (Dumbbell Nebula)",
+  type:"Nebula",
+  ra_hours:20.000000,   // ~20h00m
+  dec_deg:22.720000,    // ~+22°43′
+  zoom:12,
+  img_url:"",
+  info:"Represents the ejected outer layers of a Sun-like star. Hubble shows the central white dwarf and complex shells. Filters reveal oxygen and hydrogen emission distribution.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-27/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2027%20Dumbbell&media_type=image",
+  tags:["PlanetaryNebula","[OIII]","H-alpha"]
+},
+{
+  id:"m57",
+  name:"M57 (Ring Nebula)",
+  type:"Nebula",
+  ra_hours:18.893000,
+  dec_deg:33.028000,
+  zoom:12,
+  img_url:"",
+  info:"Famous for its ring-like appearance of ionized gas. Hubble and spectroscopy reveal how stellar winds shaped its shell. Near-infrared shows faint outer extensions beyond the visible ring.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-57/",
+  more_link:"https://images.nasa.gov/search?q=Ring%20Nebula%20M57&media_type=image",
+  tags:["PlanetaryNebula","Shell","NIR"]
+},
+{
+  id:"m76",
+  name:"M76 (Little Dumbbell)",
+  type:"Nebula",
+  ra_hours:1.700000,    // ~1h42m
+  dec_deg:51.570000,    // ~+51°34′
+  zoom:12,
+  img_url:"",
+  info:"A bipolar planetary nebula with complex lobes. NASA images resolve polar flows and ring-like structures. Chemical tracers reveal stellar evolutionary end products.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-76/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2076&media_type=image",
+  tags:["PlanetaryNebula","Bipolar","Chemistry"]
+},
+{
+  id:"m97",
+  name:"M97 (Owl Nebula)",
+  type:"Nebula",
+  ra_hours:11.233000,   // ~11h14m
+  dec_deg:55.017000,    // ~+55°01′
+  zoom:12,
+  img_url:"",
+  info:"Known for two “eye-like” voids. Hubble shows density variations and rippled edges. The white dwarf keeps the shell glowing and expanding.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-97/",
+  more_link:"https://images.nasa.gov/search?q=Owl%20Nebula%20M97&media_type=image",
+  tags:["PlanetaryNebula","Shell","WhiteDwarf"]
+},
+{
+  id:"ngc6543",
+  name:"NGC 6543 (Cat’s Eye Nebula)",
+  type:"Nebula",
+  ra_hours:17.966000,   // ~17h58m
+  dec_deg:66.633000,    // ~+66°38′
+  zoom:12,
+  img_url:"",
+  info:"Shows multiple shells and jet-like features. Hubble tracks asymmetrical outflows changing over time. Narrow-band colors provide clues to element abundances.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/wordbank/cats-eye-nebula/",
+  more_link:"https://images.nasa.gov/search?q=NGC%206543%20Cat%27s%20Eye&media_type=image",
+  tags:["PlanetaryNebula","Jets","Abundances"]
+},
+{
+  id:"ngc7009",
+  name:"NGC 7009 (Saturn Nebula)",
+  type:"Nebula",
+  ra_hours:21.066000,   // ~21h04m
+  dec_deg:-11.367000,   // ~-11°22′
+  zoom:12,
+  img_url:"",
+  info:"Named for its Saturn-like ring and extensions. High-resolution data reveal knots and jets in 3D structure. Spectroscopy shows ionization gradients with distance.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/opo0532a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%207009%20Saturn%20Nebula&media_type=image",
+  tags:["PlanetaryNebula","Knots","Spectroscopy"]
+},
+{
+  id:"ngc2392",
+  name:"NGC 2392 (Eskimo/Clown Nebula)",
+  type:"Nebula",
+  ra_hours:7.483000,    // ~7h29m
+  dec_deg:20.917000,    // ~+20°55′
+  zoom:12,
+  img_url:"",
+  info:"Features inner fur-like filaments and outer shells. Hubble shows gas shaped by the hot white dwarf’s UV radiation. Rich details trace late-stage stellar winds.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/potw1206a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%202392%20Eskimo%20Nebula&media_type=image",
+  tags:["PlanetaryNebula","Filaments","UV"]
+},
+{
+  id:"ngc7027",
+  name:"NGC 7027",
+  type:"Nebula",
+  ra_hours:21.116000,   // ~21h07m
+  dec_deg:42.233000,    // ~+42°14′
+  zoom:12,
+  img_url:"",
+  info:"A young, dense planetary nebula. NASA infrared reveals dust-rich interiors and molecular components. Expansion and morphology mark its evolutionary stage.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-5/",
+  more_link:"https://images.nasa.gov/search?q=NGC%207027&media_type=image",
+  tags:["PlanetaryNebula","Infrared","Molecules"]
+},
+{
+  id:"ngc7293",
+  name:"NGC 7293 (Helix Nebula)",
+  type:"Nebula",
+  ra_hours:22.483000,   // ~22h29m
+  dec_deg:-20.800000,   // ~-20°48′
+  zoom:11,
+  img_url:"",
+  info:"One of the largest planetary nebulae in the sky. Its rim hosts unusual knots and filaments. NASA images illustrate the future of Sun-like stars.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-63/",
+  more_link:"https://images.nasa.gov/search?q=Helix%20Nebula%20NGC%207293&media_type=image",
+  tags:["PlanetaryNebula","Knots","Filaments"]
+},
+{
+  id:"ngc2818",
+  name:"NGC 2818",
+  type:"Nebula",
+  ra_hours:9.266000,    // ~9h16m
+  dec_deg:-36.617000,   // ~-36°37′
+  zoom:12,
+  img_url:"",
+  info:"A planetary nebula seen within an open cluster. It has multi-shell, knotty structure. Hubble shows shells expanding at different speeds.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/opo0913a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%202818&media_type=image",
+  tags:["PlanetaryNebula","OpenCluster","Knots"]
+},
+{
+  id:"ngc2440",
+  name:"NGC 2440",
+  type:"Nebula",
+  ra_hours:7.683000,    // ~7h41m
+  dec_deg:-18.200000,   // ~-18°12′
+  zoom:12,
+  img_url:"",
+  info:"An irregular, high-excitation planetary nebula. Spectra reveal a very hot central star. Hubble resolves sharp filamentary structures.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/opo0307a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%202440&media_type=image",
+  tags:["PlanetaryNebula","HighExcitation","Filaments"]
+},
+{
+  id:"ngc3132",
+  name:"NGC 3132 (Southern Ring Nebula)",
+  type:"Nebula",
+  ra_hours:10.116000,   // ~10h07m
+  dec_deg:-40.433000,   // ~-40°26′
+  zoom:11,
+  img_url:"",
+  info:"Imaged jointly by JWST and Hubble. Shows multi-shell structure and signs of a central binary. Dust and gas separation appear differently across wavelengths.",
+  credit_text:"NASA/ESA/CSA",
+  credit_link:"https://webbtelescope.org/contents/media/images/2022/033/01G77PKB8NKR7S8Z6HBXMYA1WG",
+  more_link:"https://images.nasa.gov/search?q=NGC%203132%20Southern%20Ring&media_type=image",
+  tags:["PlanetaryNebula","JWST","Binary"]
+},
+{
+  id:"ngc6326",
+  name:"NGC 6326",
+  type:"Nebula",
+  ra_hours:17.333000,   // ~17h20m
+  dec_deg:-51.750000,   // ~-51°45′
+  zoom:12,
+  img_url:"",
+  info:"Shows striking asymmetries and knotty filaments. Narrow-band imaging maps element distributions. Stellar winds create complex morphology.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/potw1130a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%206326&media_type=image",
+  tags:["PlanetaryNebula","Asymmetric","Narrowband"]
+},
+{
+  id:"ngc3918",
+  name:"NGC 3918",
+  type:"Nebula",
+  ra_hours:11.833000,   // ~11h50m
+  dec_deg:-57.183000,   // ~-57°11′
+  zoom:12,
+  img_url:"",
+  info:"Known for its bright core and puffed outer shells. Hubble reveals fine rippled edges. Its chemical richness reflects late stellar evolution.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/potw1413a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%203918&media_type=image",
+  tags:["PlanetaryNebula","Ripples","Chemistry"]
+},
+{
+  id:"abell39",
+  name:"Abell 39",
+  type:"Nebula",
+  ra_hours:16.450000,   // ~16h27m
+  dec_deg:27.900000,    // ~+27°54′
+  zoom:12,
+  img_url:"",
+  info:"A nearly perfect spherical planetary nebula. Its faint, uniform shell shows smooth expansion. Ideal for testing stellar mass-loss processes.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Abell%2039&media_type=image",
+  tags:["PlanetaryNebula","Spherical","FaintShell"]
+},
+{
+  id:"m13",
+  name:"M13 (Hercules Cluster)",
+  type:"Cluster",
+  ra_hours:16.683000,   // ~16h41m
+  dec_deg:36.467000,    // ~+36°28′
+  zoom:12,
+  img_url:"",
+  info:"One of the brightest globular clusters in the Milky Way. Hubble resolves tightly packed central stars. Metal-poor, old stars provide clues to galactic history.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-13/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2013&media_type=image",
+  tags:["Globular","OldStars","MetalPoor"]
+},
+{
+  id:"m15",
+  name:"M15",
+  type:"Cluster",
+  ra_hours:21.500000,   // ~21h30m
+  dec_deg:12.167000,    // ~+12°10′
+  zoom:12,
+  img_url:"",
+  info:"A dense-core globular cluster. Hubble probes core dynamics and possible black hole candidates. Low metallicity traces early stellar chemistry.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-15/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2015&media_type=image",
+  tags:["Globular","CoreCollapse","Dynamics"]
+},
+{
+  id:"m3",
+  name:"M3",
+  type:"Cluster",
+  ra_hours:13.700000,   // ~13h42m
+  dec_deg:28.383000,    // ~+28°23′
+  zoom:12,
+  img_url:"",
+  info:"Rich in RR Lyrae variables. Hubble and ground-based time-series data calibrate its age and distance. Collapsed core reflects dynamic evolution.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-3/",
+  more_link:"https://images.nasa.gov/search?q=Messier%203&media_type=image",
+  tags:["Globular","RRLyrae","VariableStars"]
+},
+{
+  id:"m5",
+  name:"M5",
+  type:"Cluster",
+  ra_hours:15.300000,   // ~15h18m
+  dec_deg:2.083000,     // ~+2°05′
+  zoom:12,
+  img_url:"",
+  info:"A bright, extended globular cluster. HST photometry traces stellar sequences on main and horizontal branches. Chemical studies show multiple populations.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-5/",
+  more_link:"https://images.nasa.gov/search?q=Messier%205&media_type=image",
+  tags:["Globular","CMD","MultiplePopulations"]
+},
+
+/* === YENİ NESNELER — EKLE/APPEND === */
+{
+  id:"m35",
+  name:"M35",
+  type:"Cluster",
+  ra_hours:6.15,
+  dec_deg:24.333333,
+  zoom:12,
+  img_url:"",
+  info:"A rich cluster in Gemini. Photometry separates members by mass. Shares a view with NGC 2158.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2035&media_type=image",
+  tags:["OpenCluster","Gemini"]
+},
+{
+  id:"m36",
+  name:"M36",
+  type:"Cluster",
+  ra_hours:5.6,
+  dec_deg:34.133333,
+  zoom:12,
+  img_url:"",
+  info:"One of the Auriga trio. Reddening affects young stars’ colors. Mass function probes dynamics.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2036&media_type=image",
+  tags:["OpenCluster","Auriga"]
+},
+{
+  id:"m37",
+  name:"M37",
+  type:"Cluster",
+  ra_hours:5.866667,
+  dec_deg:32.55,
+  zoom:12,
+  img_url:"",
+  info:"The richest Auriga cluster. Hubble resolves faint stars in its dense core. Shows mass segregation.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2037&media_type=image",
+  tags:["OpenCluster","Auriga","MassSegregation"]
+},
+{
+  id:"m38",
+  name:"M38",
+  type:"Cluster",
+  ra_hours:5.466667,
+  dec_deg:35.85,
+  zoom:12,
+  img_url:"",
+  info:"A more spread-out Auriga cluster. Color-magnitude sequence shows intermediate age. Core less concentrated.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2038&media_type=image",
+  tags:["OpenCluster","Auriga"]
+},
+{
+  id:"m41",
+  name:"M41",
+  type:"Cluster",
+  ra_hours:6.766667,
+  dec_deg:-20.733333,
+  zoom:12,
+  img_url:"",
+  info:"Easily seen in Canis Major’s winter sky. Contains many bright stars. Ages measured in hundreds of millions of years.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2041&media_type=image",
+  tags:["OpenCluster","CanisMajor"]
+},
+{
+  id:"m23",
+  name:"M23",
+  type:"Cluster",
+  ra_hours:17.95,
+  dec_deg:-18.983333,
+  zoom:12,
+  img_url:"",
+  info:"A sparse Sagittarius arm cluster. Members include red giants. Foreground clouds complicate analysis.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2023&media_type=image",
+  tags:["OpenCluster","Sagittarius"]
+},
+{
+  id:"m25",
+  name:"M25",
+  type:"Cluster",
+  ra_hours:18.516667,
+  dec_deg:-19.25,
+  zoom:12,
+  img_url:"",
+  info:"A loose Sagittarius plane cluster. Membership refined by Gaia astrometry. Reddening from dust affects colors.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2025&media_type=image",
+  tags:["OpenCluster","Sagittarius","Gaia"]
+},
+{
+  id:"m50",
+  name:"M50",
+  type:"Cluster",
+  ra_hours:7.05,
+  dec_deg:-8.333333,
+  zoom:12,
+  img_url:"",
+  info:"A young Monoceros cluster. Includes sub-dwarfs. Surrounding nebulosity traces origins.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2050&media_type=image",
+  tags:["OpenCluster","Monoceros"]
+},
+{
+  id:"m52",
+  name:"M52",
+  type:"Cluster",
+  ra_hours:23.4,
+  dec_deg:61.583333,
+  zoom:12,
+  img_url:"",
+  info:"A bright northern cluster. Young, OB stars dominate. Dust shifts member colors red.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2052&media_type=image",
+  tags:["OpenCluster","OB","Dust"]
+},
+{
+  id:"m67",
+  name:"M67",
+  type:"Cluster",
+  ra_hours:8.85,
+  dec_deg:11.816667,
+  zoom:12,
+  img_url:"",
+  info:"An open cluster near the Sun’s age, ideal for testing solar analogs. Rotation and temperature studies; white dwarfs as chronometers.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Messier%2067&media_type=image",
+  tags:["OpenCluster","SolarAnalog","WhiteDwarfs"]
+},
+{
+  id:"ngc869",
+  name:"NGC 869 (h Persei)",
+  type:"Cluster",
+  ra_hours:2.316667,
+  dec_deg:57.15,
+  zoom:11,
+  img_url:"",
+  info:"Part of a double cluster. Rich in young OB stars. Likely common origin with χ Persei.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=NGC%20869%20h%20Persei&media_type=image",
+  tags:["OpenCluster","DoubleCluster","OB"]
+},
+{
+  id:"ngc884",
+  name:"NGC 884 (χ Persei)",
+  type:"Cluster",
+  ra_hours:2.366667,
+  dec_deg:57.133333,
+  zoom:11,
+  img_url:"",
+  info:"The twin of h Persei. Spectroscopy probes massive stellar winds; part of a broad OB association.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://science.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=NGC%20884%20chi%20Persei&media_type=image",
+  tags:["OpenCluster","DoubleCluster","OB"]
+},
+{
+  id:"ngc2244",
+  name:"NGC 2244 (Rosette Cluster)",
+  type:"Cluster",
+  ra_hours:6.516667,
+  dec_deg:4.933333,
+  zoom:11,
+  img_url:"",
+  info:"Young cluster inside the Rosette Nebula. Member UV radiation carved a vast bubble; sharp edges visible in Hubble images.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://www.nasa.gov/image-article/rosette-nebula/",
+  more_link:"https://images.nasa.gov/search?q=NGC%202244%20Rosette%20Cluster&media_type=image",
+  tags:["OpenCluster","Rosette","UV"]
+},
+{
+  id:"ngc6530",
+  name:"NGC 6530 (Lagoon Cluster)",
+  type:"Cluster",
+  ra_hours:18.066667,
+  dec_deg:-24.35,
+  zoom:11,
+  img_url:"",
+  info:"Young stars born in M8. Infrared reveals embedded low-mass members; stellar winds disperse gas.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://www.nasa.gov/image-article/lagoon-nebula-undersea-world/",
+  more_link:"https://images.nasa.gov/search?q=NGC%206530%20cluster&media_type=image",
+  tags:["OpenCluster","Lagoon","Infrared"]
+},
+{
+  id:"ngc6611",
+  name:"NGC 6611 (Eagle Cluster)",
+  type:"Cluster",
+  ra_hours:18.316667,
+  dec_deg:-13.783333,
+  zoom:11,
+  img_url:"",
+  info:"Core of M16. Members ionize the Pillars of Creation; multi-wavelength data reveal protoplanetary disks.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/heic1501a/",
+  more_link:"https://images.nasa.gov/search?q=NGC%206611%20Eagle%20Cluster&media_type=image",
+  tags:["OpenCluster","M16","Proplyds"]
+},
+{
+  id:"cas_a",
+  name:"Cassiopeia A (SNR)",
+  type:"SNR",
+  ra_hours:23.39,
+  dec_deg:58.815,
+  zoom:9,
+  img_url:"",
+  info:"A young, bright supernova remnant. Chandra maps explosion elements; time-series track shock expansion.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/photo/2013/casa/",
+  more_link:"https://images.nasa.gov/search?q=Cassiopeia%20A&media_type=image",
+  tags:["SNR","Chandra","Shocks"]
+},
+{
+  id:"tycho_snr",
+  name:"Tycho SNR (SN 1572)",
+  type:"SNR",
+  ra_hours:0.422222,
+  dec_deg:64.133333,
+  zoom:9,
+  img_url:"",
+  info:"Historical Type Ia SNR. Chandra shows fine structures of forward/reverse shocks; element mapping constrains explosion physics.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/photo/2019/tycho/",
+  more_link:"https://images.nasa.gov/search?q=Tycho%20SNR&media_type=image",
+  tags:["SNR","TypeIa","Shocks"]
+},
+{
+  id:"kepler_snr",
+  name:"Kepler SNR (SN 1604)",
+  type:"SNR",
+  ra_hours:17.511667,
+  dec_deg:-21.483333,
+  zoom:9,
+  img_url:"",
+  info:"Type Ia remnant in the plane. X-ray spectroscopy reveals iron-rich ejecta; optical filaments show environmental interaction.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/photo/2013/kepler/",
+  more_link:"https://images.nasa.gov/search?q=Kepler%20SNR&media_type=image",
+  tags:["SNR","TypeIa","Ejecta"]
+},
+{
+  id:"vela_snr",
+  name:"Vela SNR",
+  type:"SNR",
+  ra_hours:8.583333,
+  dec_deg:-45.166667,
+  zoom:9,
+  img_url:"",
+  info:"Nearby, large remnant with filaments. Multi-wavelength data reveal turbulence; contains the Vela Pulsar.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://www.nasa.gov/image-article/vela-supernova-remnant/",
+  more_link:"https://images.nasa.gov/search?q=Vela%20SNR&media_type=image",
+  tags:["SNR","Pulsar","Filaments"]
+},
+{
+  id:"veil_cygnus_loop",
+  name:"Cygnus Loop / Veil",
+  type:"SNR",
+  ra_hours:20.85,
+  dec_deg:31.05,
+  zoom:9,
+  img_url:"",
+  info:"Old, wide shock shell. NASA images highlight magnetic-field-aligned filaments; regions show varied shock speeds.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://www.nasa.gov/image-article/veil-nebula/",
+  more_link:"https://images.nasa.gov/search?q=Veil%20Nebula%20Cygnus%20Loop&media_type=image",
+  tags:["SNR","Filaments","MagneticFields"]
+},
+{
+  id:"ic443",
+  name:"IC 443 (Jellyfish)",
+  type:"SNR",
+  ra_hours:6.283333,
+  dec_deg:22.516667,
+  zoom:10,
+  img_url:"",
+  info:"A remnant interacting with a molecular cloud. Infrared shows shock-heated dust; such collisions link to cosmic-ray acceleration.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://www.nasa.gov/image-article/ic-443-jellyfish-nebula/",
+  more_link:"https://images.nasa.gov/search?q=IC%20443%20Jellyfish&media_type=image",
+  tags:["SNR","MolecularCloud","IR"]
+},
+
+/* === YENİ NESNELER — EKLE/APPEND === */
+{
+  id:"w44",
+  name:"W44",
+  type:"SNR",
+  ra_hours:18.933333,   // ~18h56m
+  dec_deg:1.300000,     // ~+01°18′
+  zoom:9,
+  img_url:"",
+  info:"A remnant embedded in a dense environment. X-ray and radio separate pre- and post-shock regions. Molecular emissions support cloud interaction.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=W44%20supernova%20remnant&media_type=image",
+  tags:["SNR","MolecularCloud","Shocks"]
+},
+{
+  id:"w49b",
+  name:"W49B",
+  type:"SNR",
+  ra_hours:19.185278,   // 19h11m07s
+  dec_deg:9.100000,     // ~+09°06′
+  zoom:9,
+  img_url:"",
+  info:"An asymmetric remnant. Chandra shows irregular element distributions; explosion geometry may be unusual.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=W49B&media_type=image",
+  tags:["SNR","Asymmetric","Abundances"]
+},
+{
+  id:"3c58",
+  name:"3C 58",
+  type:"PWN",
+  ra_hours:2.093889,    // 02h05m38s
+  dec_deg:64.816667,    // +64°49′
+  zoom:10,
+  img_url:"",
+  info:"Contains a young pulsar wind nebula. X-rays show filaments and knots; the central pulsar injects energy.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=3C%2058&media_type=image",
+  tags:["Pulsar","PWN","Filaments"]
+},
+{
+  id:"puppis_a",
+  name:"Puppis A",
+  type:"SNR",
+  ra_hours:8.383333,    // ~08h23m
+  dec_deg:-42.983333,   // ~-42°59′
+  zoom:9,
+  img_url:"",
+  info:"A fragmented remnant. X-rays resolve multi-temperature plasmas; foreground absorption complicates analysis.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=Puppis%20A&media_type=image",
+  tags:["SNR","Xray","Absorption"]
+},
+{
+  id:"g292_1p8",
+  name:"G292.0+1.8",
+  type:"SNR",
+  ra_hours:11.400000,   // ~11h24m
+  dec_deg:-59.250000,   // ~-59°15′
+  zoom:9,
+  img_url:"",
+  info:"An oxygen-rich core-collapse remnant. Chandra maps individual element knots; young age confirmed dynamically.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=G292.0%2B1.8&media_type=image",
+  tags:["SNR","OxygenRich","CoreCollapse"]
+},
+{
+  id:"rcw86",
+  name:"RCW 86 (SN 185)",
+  type:"SNR",
+  ra_hours:14.716667,   // ~14h43m
+  dec_deg:-62.466667,   // ~-62°28′
+  zoom:9,
+  img_url:"",
+  info:"Possibly the oldest recorded supernova. X-rays show fast shocks forming a wide shell; speeds match historical records.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=RCW%2086&media_type=image",
+  tags:["SNR","Historic","FastShocks"]
+},
+{
+  id:"sn1006",
+  name:"SN 1006",
+  type:"SNR",
+  ra_hours:15.033333,   // ~15h02m
+  dec_deg:-41.933333,   // ~-41°56′
+  zoom:9,
+  img_url:"",
+  info:"The brightest recorded supernova remnant. Radio and X-rays trace shock acceleration; large size enables detailed study.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=SN%201006%20remnant&media_type=image",
+  tags:["SNR","ShockAccel","LargeShell"]
+},
+{
+  id:"g1_9p0_3",
+  name:"G1.9+0.3",
+  type:"SNR",
+  ra_hours:17.812500,   // 17h48m45s
+  dec_deg:-27.166667,   // -27°10′
+  zoom:9,
+  img_url:"",
+  info:"Youngest Milky Way remnant candidate. Time-lapse X-rays directly show expansion; near the Galactic Center.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=G1.9%2B0.3&media_type=image",
+  tags:["SNR","Young","Expansion"]
+},
+{
+  id:"kes75",
+  name:"Kes 75",
+  type:"SNR/PWN",
+  ra_hours:18.773889,   // ~18h46m26s
+  dec_deg:-2.983333,    // ~-02°59′
+  zoom:10,
+  img_url:"",
+  info:"Hosts a young pulsar and wind nebula. X-ray maps trace the central engine; remnant and PWN evolve together.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=Kes%2075&media_type=image",
+  tags:["SNR","PWN","Pulsar"]
+},
+{
+  id:"crab_pulsar",
+  name:"Crab Pulsar (PSR B0531+21)",
+  type:"Pulsar",
+  ra_hours:5.575547,    // 05h34m31.97s
+  dec_deg:22.014472,    // +22°00′52.1″
+  zoom:10,
+  img_url:"",
+  info:"The young neutron star of the 1054 supernova. Chandra and Hubble show its torus and jets; pulses trace rotation energy.",
+  credit_text:"NASA/Chandra/ESA",
+  credit_link:"https://chandra.harvard.edu/photo/2000/0052/",
+  more_link:"https://images.nasa.gov/search?q=Crab%20Pulsar&media_type=image",
+  tags:["Pulsar","Jets","Torus"]
+},
+{
+  id:"vela_pulsar",
+  name:"Vela Pulsar",
+  type:"Pulsar",
+  ra_hours:8.588889,    // 08h35m20s
+  dec_deg:-45.100000,   // ~-45°06′
+  zoom:10,
+  img_url:"",
+  info:"A fast spinner inside Vela SNR. X-ray jets and arcs change over time; pulses span broad wavelengths.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/",
+  more_link:"https://images.nasa.gov/search?q=Vela%20Pulsar&media_type=image",
+  tags:["Pulsar","Jets","Variability"]
+},
+{
+  id:"psr_b1509_58",
+  name:"PSR B1509−58",
+  type:"Pulsar",
+  ra_hours:15.231944,   // 15h13m55s
+  dec_deg:-59.133000,   // ~-59°08′
+  zoom:10,
+  img_url:"",
+  info:"A young, energetic pulsar—famous for the ‘cosmic hand’ shape in X-rays. Strong magnetic field sculpts plasma.",
+  credit_text:"NASA/Chandra",
+  credit_link:"https://chandra.harvard.edu/photo/2014/psr1509/",
+  more_link:"https://images.nasa.gov/search?q=PSR%20B1509-58&media_type=image",
+  tags:["Pulsar","Magnetosphere","PWN"]
+},
+{
+  id:"geminga",
+  name:"Geminga",
+  type:"Pulsar",
+  ra_hours:6.565000,    // ~06h33m54s
+  dec_deg:17.766667,    // ~+17°46′
+  zoom:10,
+  img_url:"",
+  info:"A faint radio source but bright in gamma/X-rays. NASA data track motion and tails; key isolated pulsar.",
+  credit_text:"NASA",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Geminga&media_type=image",
+  tags:["Pulsar","GammaRay","ProperMotion"]
+},
+{
+  id:"psr_j0437_4715",
+  name:"PSR J0437−4715",
+  type:"Pulsar",
+  ra_hours:4.621111,    // 04h37m16s
+  dec_deg:-47.250000,   // -47°15′
+  zoom:11,
+  img_url:"",
+  info:"A nearby millisecond pulsar. Timing tests measure mass and GR; X-rays and radio reveal hot polar spots.",
+  credit_text:"NASA",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=PSR%20J0437-4715&media_type=image",
+  tags:["Pulsar","Millisecond","Timing"]
+},
+{
+  id:"sgr1806_20",
+  name:"SGR 1806−20 (Magnetar)",
+  type:"Magnetar",
+  ra_hours:18.144167,   // 18h08m39s
+  dec_deg:-20.400000,   // -20°24′
+  zoom:11,
+  img_url:"",
+  info:"An extremely magnetic neutron star. Giant flares are major high-energy events; X-ray data show magnetospheric changes.",
+  credit_text:"NASA",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=SGR%201806-20&media_type=image",
+  tags:["Magnetar","Flares","HighEnergy"]
+},
+{
+  id:"psr_j1745_2900",
+  name:"PSR J1745−2900 (GC Magnetar)",
+  type:"Magnetar",
+  ra_hours:17.761111,   // 17h45m40s
+  dec_deg:-29.008333,   // -29°00′30″
+  zoom:11,
+  img_url:"",
+  info:"A magnetar near the Galactic Center. Detected in X-rays despite absorption; linked to the Sgr A* environment.",
+  credit_text:"NASA",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=PSR%20J1745-2900&media_type=image",
+  tags:["Magnetar","GalacticCenter","Absorption"]
+},
+{
+  id:"rxj1856_5_3754",
+  name:"RX J1856.5−3754",
+  type:"NeutronStar",
+  ra_hours:18.943056,   // 18h56m35s
+  dec_deg:-37.908611,   // -37°54′31″
+  zoom:11,
+  img_url:"",
+  info:"A nearby isolated neutron star with a simple spectrum. Surface properties constrain physics; optical/X-ray fit atmosphere models.",
+  credit_text:"NASA",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=RX%20J1856.5-3754&media_type=image",
+  tags:["NeutronStar","Atmosphere","Nearby"]
+},
+{
+  id:"psr_j0030_0451",
+  name:"PSR J0030+0451",
+  type:"Pulsar",
+  ra_hours:0.507500,    // 00h30m27s
+  dec_deg:4.860833,     // +04°51′39″
+  zoom:11,
+  img_url:"",
+  info:"NICER mapped its surface hot spots. Pulse profiles constrain the neutron star equation of state.",
+  credit_text:"NASA/NICER",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=PSR%20J0030%2B0451&media_type=image",
+  tags:["Pulsar","NICER","EOS"]
+},
+{
+  id:"psr_j1023_0038",
+  name:"PSR J1023+0038",
+  type:"Pulsar",
+  ra_hours:10.396389,   // 10h23m47s
+  dec_deg:0.644722,     // +00°38′41″
+  zoom:11,
+  img_url:"",
+  info:"A transitional system between rotation-powered and accreting. X-ray and radio vary with state—key for accretion physics.",
+  credit_text:"NASA",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=PSR%20J1023%2B0038&media_type=image",
+  tags:["Transitional","Accretion","Timing"]
+},
+{
+  id:"betelgeuse",
+  name:"Betelgeuse (Alpha Orionis)",
+  type:"Star",
+  ra_hours:5.919444,    // 05h55m10s
+  dec_deg:7.406944,     // +07°24′25″
+  zoom:12,
+  img_url:"",
+  info:"A red supergiant with notable brightness changes. Hubble and ground data trace convective cells and dust ejections—key to pre-supernova mass loss.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Betelgeuse&media_type=image",
+  tags:["RedSupergiant","Variability","MassLoss"]
+},
+{
+  id:"rigel",
+  name:"Rigel (Beta Orionis)",
+  type:"Star",
+  ra_hours:5.242222,    // 05h14m32s
+  dec_deg:-8.201667,    // -08°12′06″
+  zoom:12,
+  img_url:"",
+  info:"A blue supergiant with strong winds. Spectroscopy measures mass-loss rates and atmospheric waves; reflection nebulosity lights its environment.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://www.nasa.gov/",
+  more_link:"https://images.nasa.gov/search?q=Rigel%20Beta%20Orionis&media_type=image",
+  tags:["BlueSupergiant","Winds","Spectroscopy"]
+}
+
+
+
+];
+
+/* ================================
+   2) WWT BAŞLAT — KOORDİNAT MODU DÜZELTİLDİ
+================================== */
+let wwt, script_interface, rafId;
+function initWWT(){
+  const builder = new wwtlib.WWTControlBuilder("wwtcanvas");
+  builder.startRenderLoop(true);
+  script_interface = builder.create();
+  script_interface.add_ready(onReady);
+}
+function onReady(){
+  wwt = wwtlib.WWTControl.singleton;
+
+  // Arka plan: Gaia; takımyıldız/grid kapalı; ***GALACTIC MODE KAPALI***
+  wwt.setBackgroundImageByName("Gaia");
+  const S = (wwtlib.Settings && wwtlib.Settings.get_active) ? wwtlib.Settings.get_active() : null;
+  if (S){
+    ["set_showConstellationFigures","set_showConstellationLabels","set_showConstellationBoundaries",
+     "set_showConstellationSelection","set_showConstellationPictures","set_showGrid","set_showEquatorialGridText",
+     "set_showGalacticGrid","set_showGalacticGridText","set_showEcliptic","set_showEclipticGrid","set_showEclipticGridText",
+     "set_showCrosshairs"].forEach(fn=>{ if(typeof S[fn]==="function") S[fn](false); });
+    if (typeof S.set_galacticMode==="function") S.set_galacticMode(false); // <-- önemli
+  }
+
+  // Genel görünüm
+  wwt.gotoRADecZoom(0,0,360,false);
+
+  // Liste ve markerlar
+  buildList();
+  buildMarkers();
+  trackMarkers(); // sürekli ekranda doğru noktada tut
+
+  // Etkileşimler
+  window.addEventListener("resize", ()=>{ cancelAnimationFrame(rafId); trackMarkers(); });
+  document.getElementById("resetView").addEventListener("click", ()=>{ hidePopup(); wwt.gotoRADecZoom(0,0,360,false); });
+  document.getElementById("closePopup").addEventListener("click", hidePopup);
+  document.getElementById("wwtcanvas").addEventListener("wheel", e => e.preventDefault(), {passive:false});
+}
+
+/* ================================
+   3) LİSTE — arama + odaklan
+================================== */
+function buildList(){
+  const list = document.getElementById("list");
+  const search = document.getElementById("search");
+  function render(q=""){
+    list.innerHTML="";
+    const ql = q.trim().toLowerCase();
+    OBJECTS.filter(o=>{
+      if(!ql) return true;
+      return (o.id?.toLowerCase().includes(ql) || o.name?.toLowerCase().includes(ql) ||
+              o.type?.toLowerCase().includes(ql) || (o.tags||[]).some(t=>t.toLowerCase().includes(ql)));
+    }).forEach(o=>{
+      const row = document.createElement("div"); row.className="item";
+      const go = document.createElement("button"); go.textContent="Focus";
+      go.title = "Zoom in on the map"; go.onclick = ()=>focusObject(o);
+      const label = document.createElement("div");
+      label.innerHTML = `<strong>${o.name}</strong> <span class="badge">• ${o.type||"other"}</span>`;
+      row.append(go,label); list.append(row);
+    });
+  }
+  render();
+  search.addEventListener("input", e=>render(e.target.value));
+}
+
+/* ================================
+   4) MARKER (YUVARLAK) — her nesneye ayrı
+================================== */
+const markerMap = new Map(); // id -> button
+function buildMarkers(){
+  OBJECTS.forEach(o=>{
+    if(!Number.isFinite(o.ra_hours) || !Number.isFinite(o.dec_deg)) return;
+    const b = document.createElement("button");
+    b.className="astro-btn"; b.id = `${o.id}btn`; b.title = o.name || o.id;
+    b.addEventListener("click", ()=>focusObject(o));  // tıklayınca pop-out + yakınlaş (M42 davranışı)
+    document.body.appendChild(b);
+    markerMap.set(o.id,b);
+  });
+}
+/* Sürekli ekran koordinatlarını takip et (M42 tarzı) */
+function trackMarkers(){
+  function step(){
+    markerMap.forEach((btn,id)=>{
+      const o = OBJECTS.find(x=>x.id===id); if(!o) return;
+      const pt = wwt.getScreenPointForCoordinates(o.ra_hours, o.dec_deg); // RA(saat), Dec(derece)
+      if(pt && Number.isFinite(pt.x) && Number.isFinite(pt.y)){
+        const w = innerWidth, h = innerHeight, m = 12;
+        if(pt.x>m && pt.x<w-m && pt.y>m && pt.y<h-m){
+          btn.style.left = pt.x+"px"; btn.style.top = pt.y+"px"; btn.style.display="block";
+        } else btn.style.display="none"; // ekran dışındaysa gizle
+      }
+    });
+    rafId = requestAnimationFrame(step);
+  }
+  rafId = requestAnimationFrame(step);
+}
+
+/* ================================
+   5) ODAK + POP-OUT — M42 ile aynı akış
+================================== */
+function focusObject(o){
+  if(Number.isFinite(o.ra_hours) && Number.isFinite(o.dec_deg)){
+    wwt.gotoRADecZoom(o.ra_hours, o.dec_deg, o.zoom ?? 10, false);
+  }
+  document.getElementById("title").textContent = o.name || o.id;
+  const img = document.getElementById("img");
+  img.src = o.img_url || "";
+  img.alt = (o.name||"Object")+" Picture";
+  document.getElementById("info").textContent = o.info || "No information added.";
+  const credit = document.getElementById("credit");
+  credit.innerHTML = `
+    ${o.credit_text ? o.credit_text : "" }
+    ${o.credit_link ? ` — <a href="${o.credit_link}" target="_blank" rel="noopener">source</a>` : ""}
+    ${o.more_link ? ` — <a href="${o.more_link}" target="_blank" rel="noopener">more</a>` : ""}
+  `;
+  showPopup();
+}
+function showPopup(){ document.getElementById("popup").classList.add("visible"); }
+function hidePopup(){ document.getElementById("popup").classList.remove("visible"); }
+
+/* ================================
+   6) BAŞLAT
+================================== */
+window.addEventListener("load", initWWT);
+</script>
+</body>
+</html>
