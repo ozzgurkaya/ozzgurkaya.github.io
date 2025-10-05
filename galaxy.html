@@ -3,14 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>YoungScientisTED - Milky Way Galaxy</title>
+<title>GalaxySCOPE - Milky Way Galaxy</title>
 <script src="https://web.wwtassets.org/engine/7/wwtsdk.js"></script>
 <style>
 :root{--ink:#e6ecff;--muted:#9bb0d3;--panel:#0f1420;--ring:#8ab6ff;--ring2:#3aa3ff}
 html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
 #wwtcanvas{position:fixed;inset:0;background:#000}
 
-/* ÜST HUD */
 .hud{position:fixed;left:16px;top:16px;display:flex;gap:10px;align-items:center;z-index:5;
   background:linear-gradient(180deg,rgba(7,10,18,.88),rgba(7,10,18,.55));border:1px solid rgba(124,197,255,.25);
   border-radius:14px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
@@ -18,7 +17,6 @@ html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 I
 .hud button{appearance:none;border:1px solid rgba(124,197,255,.25);background:var(--panel);color:var(--ink);
   padding:8px 10px;border-radius:10px;font-weight:600;cursor:pointer}
 
-/* ALT SOL: Liste paneli */
 #panel{
   position:fixed;left:16px;bottom:16px;z-index:6;width:min(460px,calc(100vw - 32px));
   background:linear-gradient(180deg,rgba(10,14,24,.92),rgba(10,14,24,.86));
@@ -32,7 +30,6 @@ html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 I
 .item button{border:1px solid rgba(124,197,255,.25);background:#0b1120;color:#e6ecff;border-radius:10px;padding:6px 8px;cursor:pointer}
 .badge{font-size:11px;color:#9bb0d3}
 
-/* HER NESNE İÇİN AYRI YUVARLAK — M42 ile birebir stil/animasyon */
 .astro-btn{
   position:fixed;left:-9999px;top:-9999px;z-index:6;width:22px;height:22px;border-radius:999px;cursor:pointer;
   background:radial-gradient(closest-side,#b9d6ff,#639cff 65%, #1b2a52);
@@ -46,7 +43,6 @@ html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 I
 }
 @keyframes pulse{0%{transform:scale(.5);opacity:.8}100%{transform:scale(1.6);opacity:0}}
 
-/* POP-OUT (sağ üst, TAŞMA KORUMALI) — M42’deki davranış */
 #popup{
   position:fixed;
   right:calc(max(12px,env(safe-area-inset-right)));
@@ -74,7 +70,7 @@ html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 I
 
 <!-- ÜST HUD -->
 <div class="hud" role="toolbar">
-  <h1>Milky Way — Gaia</h1>
+  <h1>Milky Way Galaxy</h1>
   <button id="resetView" title="General View">General View</button>
 </div>
 
@@ -95,20 +91,17 @@ html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 I
 </div>
 
 <script>
-/* ================================
-   1) NESNE LİSTESİ — sadece POZİSYONLAR düzeltildi
-   (RA saat, Dec derece; ekvatoryal J2000)
-================================== */
+
 const OBJECTS = [
   {
     id:"m42",
     name:"M42 (Orion Nebula)",
     type:"Nebula",
-    ra_hours:5.588138889,   // 5h35m17s
-    dec_deg:-5.391111111,   // -5°23′28″
+    ra_hours:5.588138889,
+    dec_deg:-5.391111111, 
     zoom:8,
     img_url:"https://svs.gsfc.nasa.gov/vis/a030000/a030900/a030947/orion_nebula-hst-9000x9000_print.jpg",
-    info:"A large H II region and the brightest part of the Orion Molecular Cloud Complex. NASA’s Hubble and JWST have imaged young stars and protoplanetary disks.",
+    info:"The Orion Nebula (M42) is one of the brightest nebulae in the night sky, located about 1,350 light-years away in the Orion constellation. It is a massive star-forming region, where new stars and planetary systems are actively being born. The nebula’s colorful clouds of gas and dust make it a popular target for astronomers and astrophotographers.",
     credit_text:"NASA/ESA — Hubble",
     credit_link:"https://svs.gsfc.nasa.gov/30947/",
     more_link:"https://images.nasa.gov/search?q=M42%20(Orion%20Bulutsusu)&media_type=image",
@@ -119,93 +112,81 @@ const OBJECTS = [
   { id:"m8", name:"M8 (Lagoon Nebula)", type:"Nebula",
     ra_hours:18.0603,  dec_deg:-24.383, zoom:10,
     img_url:"https://svs.gsfc.nasa.gov/vis/a030000/a030700/a030775/orion_nebula_vis_ir-hst_sst-3240x3240_print.jpg",
-    info:"A vast emission nebula where star formation continues. Hubble images clearly show the pillars and shock fronts carved by ionized gas. Near-UV and optical data illustrate how newborn massive stars shape their environment.", credit_text:"NASA/ESA — Hubble",
+    info:"The Lagoon Nebula (M8) is a giant interstellar cloud of gas and dust located about 4,000–6,000 light-years away in the constellation Sagittarius. It is a vibrant star-forming region, where massive young stars illuminate the surrounding clouds, creating a glowing appearance. Its striking pink and red colors, caused by ionized hydrogen gas, make it one of the most photographed nebulae in the night sky.", credit_text:"NASA/ESA — Hubble",
     credit_link:"https://www.nasa.gov/image-article/lagoon-nebula-undersea-world/", more_link:"https://images.nasa.gov/search?q=Lagoon%20Nebula&media_type=image", tags:["HII"] },
 
   { id:"m17", name:"M17 (Omega/Swan Nebula)", type:"Nebula",
     ra_hours:18.3406,  dec_deg:-16.1767, zoom:12,
-    img_url:"", info:"A stellar nursery glowing with hot, ionized hydrogen. NASA observations show stellar winds creating bubbles and carving the gas. This structure serves as a laboratory to understand how feedback regulates the galactic environment.",
+    img_url:"https://cdn.esahubble.org/archives/images/thumb700x/heic0206g.jpg", info:"The Omega Nebula (also known as the Swan Nebula, M17) is a bright emission nebula located about 5,000–6,000 light-years away in the constellation Sagittarius. It is a stellar nursery where new stars are forming inside huge clouds of hydrogen gas. Its shape resembles a swan gliding through water, which is why it is also called the Swan Nebula.",
     credit_text:"NASA/ESA — Hubble", credit_link:"https://esahubble.org/images/heic0206g/",
     more_link:"https://images.nasa.gov/search?q=Omega%20Nebula%20M17&media_type=image", tags:["HII"] },
 
   { id:"m16", name:"M16 (Eagle Nebula)", type:"Nebula",
     ra_hours:18.3133,  dec_deg:-13.8067, zoom:12,
     img_url:"https://cdn.esahubble.org/archives/images/large/heic1501a.jpg",
-    info:"Famous for its “Pillars of Creation.” Hubble and JWST reveal star seeds hidden within dense knots inside the pillars. X-ray and infrared data show that energetic radiation from young stars evaporates the gas.", credit_text:"NASA/ESA — Hubble",
+    info:"The Eagle Nebula (M16) is a young star-forming region located about 7,000 light-years away in the constellation Serpens. It is most famous for the Pillars of Creation, towering clouds of gas and dust captured in iconic Hubble images, where new stars are being born. The nebula’s glowing hydrogen gas and dramatic structures make it one of the most studied and photographed nebulae in the sky.", credit_text:"NASA/ESA — Hubble",
     credit_link:"https://esahubble.org/images/heic1501a/", more_link:"https://images.nasa.gov/search?q=Pillars%20of%20Creation%20M16&media_type=image", tags:["HII"] },
 
   { id:"m20", name:"M20 (Trifid Nebula)", type:"Nebula",
     ra_hours:18.0397,  dec_deg:-23.03, zoom:11,
     img_url:"https://cdn.esahubble.org/archives/images/large/opo9909a.jpg",
-    info:"A rare system combining emission, reflection, and dark nebula components. Hubble images show dust lanes dividing starlight into fragments. Multi-wavelength views reveal the nebula’s layered structure.", credit_text:"NASA/ESA — Hubble",
+    info:"The Trifid Nebula (M20) is a colorful star-forming region located about 5,000 light-years away in the constellation Sagittarius. It is famous for its three dark dust lanes that divide the bright nebula into three distinct sections, giving it the name Trifid. The nebula combines emission, reflection, and dark nebula features, making it a striking and unique object in the night sky.", credit_text:"NASA/ESA — Hubble",
     credit_link:"https://science.nasa.gov/asset/hubble/trifid-nebula-messier-20ngc-6514/",
     more_link:"https://images.nasa.gov/search?q=Trifid%20Nebula%20M20&media_type=image", tags:["HII"] },
 
   { id:"m78", name:"M78", type:"Nebula",
     ra_hours:5.7792,   dec_deg:0.05, zoom:10,
-    img_url:"https://cdn.spacetelescope.org/archives/images/large/opo0001a.jpg",
-    info:"A bright reflection nebula in the Orion region. NASA’s infrared observations detect embedded young stars hidden in seemingly dark cores. Starlight scattered by dust gives the nebula a bluish glow.", credit_text:"NASA/ESA — Hubble",
+    img_url:"https://science.nasa.gov/wp-content/uploads/2023/04/m78_0-jpg.webp",
+    info:"M78 is a reflection nebula located about 1,350 light-years away in the constellation Orion. Unlike emission nebulae, it shines by reflecting the light of nearby young stars off interstellar dust. It is the brightest reflection nebula in Orion and is part of a larger star-forming complex filled with gas, dust, and newly forming stars.", credit_text:"NASA/ESA — Hubble",
     credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-78/",
     more_link:"https://images.nasa.gov/search?q=M78%20reflection%20nebula&media_type=image", tags:["Reflection"] },
 
   { id:"m31", name:"M31 (Andromeda Galaxy)", type:"Galaxy",
     ra_hours:0.7123,   dec_deg:41.2692, zoom:10,
-    img_url:"", info:"Largest spiral in the Local Group.", credit_text:"", credit_link:"", more_link:"", tags:["Spiral","LocalGroup"] },
+    img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2005/09/STScI-01EVVMCY7R7W9M85P20BC3ZSPY.jpg?w=800&h=800&fit=crop&crop=faces%2Cfocalpoint", info:"The Andromeda Galaxy (M31) is the closest spiral galaxy to the Milky Way, located about 2.5 million light-years away. It is the largest galaxy in the Local Group, containing roughly one trillion stars. Astronomers predict that Andromeda and the Milky Way will collide in about 4 billion years, forming a single massive galaxy.", credit_text:"NASA/ESA — Hubble", credit_link:"https://science.nasa.gov/asset/hubble/andromeda-galaxy-m31/", more_link:"", tags:["Spiral","LocalGroup"] },
 
   { id:"m57", name:"M57 (Ring Nebula)", type:"Nebula",
     ra_hours:18.893,   dec_deg:33.028, zoom:12,
-    img_url:"", info:"Famous for its ring-like appearance of ionized gas. Hubble and spectroscopy reveal how stellar winds shaped its shell. Near-infrared shows faint outer extensions beyond the visible ring.", credit_text:"", credit_link:"", more_link:"", tags:["Planetary"] },
+    img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/1999/01/STScI-01EVVFQT9NG6BSZMDQM3FAQ3WR.tif?w=1215&h=1241&fit=crop&crop=faces%2Cfocalpoint", info:"The Ring Nebula (M57) is a famous planetary nebula located about 2,300 light-years away in the constellation Lyra. It was formed when a dying star expelled its outer layers, leaving behind a glowing shell of gas surrounding a hot white dwarf. Its round, ring-like shape and colorful appearance make it one of the most studied and photographed planetary nebulae in the sky.", credit_text:"NASA/ESA — Hubble", credit_link:"https://science.nasa.gov/asset/hubble/the-ring-nebula-m57/", more_link:"", tags:["Planetary"] },
 
   { id:"ngc7000", name:"NGC 7000 (North America Nebula)", type:"Nebula",
     ra_hours:20.9817, dec_deg:44.333, zoom:10,
-    img_url:"https://cdn.esahubble.org/archives/images/large/opo0225g.jpg",
-    info:"A large H II region shaped like the continent. NASA mosaics map different density and temperature layers. Nearby young clusters carve the nebula with radiation, triggering new star formation.", credit_text:"NASA/ESA — Hubble",
-    credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-20/",
+    img_url:"https://cdn.esahubble.org/archives/images/thumb700x/heic0510a.jpg",
+    info:"The North America Nebula (NGC 7000) is a large emission nebula located about 2,600 light-years away in the constellation Cygnus. Its shape strongly resembles the outline of the North American continent, which is how it got its name. The nebula is a massive region of ionized hydrogen where new stars are being born, and it is often studied along with the nearby Pelican Nebula.", credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://esahubble.org/images/heic0510a/",
     more_link:"https://images.nasa.gov/search?q=NGC%207000%20North%20America%20Nebula&media_type=image", tags:["HII"] },
 
   { id:"ic5070", name:"IC 5070 (Pelican Nebula)", type:"Nebula",
     ra_hours:20.8467, dec_deg:44.35, zoom:10,
-    img_url:"https://apod.nasa.gov/apod/image/1909/PelicanNebula_SHO_1920.jpg",
-    info:"A star-forming region adjacent to the North America Nebula. Hubble and ground-based data together show newborn stars at the tips of gas pillars. Edge ionization fronts display how UV radiation sculpts molecular clouds.", credit_text:"NASA/ESA — Hubble (APOD)",
+    img_url:"https://apod.nasa.gov/apod/image/1909/Pelican_Akar_960.jpg",
+    info:"The Pelican Nebula (IC 5070) is an emission nebula located about 1,800 light-years away in the constellation Cygnus. Its shape resembles a pelican, which gave it its name, and it lies close to the North America Nebula as part of the same large star-forming region. Within its glowing clouds of hydrogen gas and dark dust lanes, astronomers observe active star birth and evolving young stellar objects.", credit_text:"NASA/ESA — Hubble (APOD)",
     credit_link:"https://apod.nasa.gov/apod/ap190925.html",
     more_link:"https://images.nasa.gov/search?q=IC%205070%20Pelican%20Nebula&media_type=image", tags:["HII"] },
 
   { id:"ngc1499", name:"NGC 1499 (California Nebula)", type:"Nebula",
     ra_hours:4.0539,   dec_deg:36.4167, zoom:11,
-    img_url:"https://www.nasa.gov/wp-content/uploads/2023/06/california_nebula_wise.jpg",
-    info:"An elongated emission nebula. NASA wide-field data trace faint hydrogen gas. UV light from nearby hot stars illuminates the nebula.", credit_text:"NASA",
-    credit_link:"https://science.nasa.gov/image-article/california-nebula/",
+    img_url:"https://apod.nasa.gov/apod/image/2503/California_Mendez_960.jpg",
+    info:"The California Nebula (NGC 1499) is a large emission nebula located about 1,000 light-years away in the constellation Perseus. Its elongated shape resembles the outline of the U.S. state of California, which is how it got its name. The nebula glows brightly in red due to hydrogen gas being ionized by the nearby hot, young star Xi Persei.", credit_text:"NASA",
+    credit_link:"https://apod.nasa.gov/apod/ap250310.html",
     more_link:"https://images.nasa.gov/search?q=NGC%201499%20California%20Nebula&media_type=image", tags:["HII"] },
 
   { id:"rosette", name:"NGC 2237/38/44 (Rosette Nebula)", type:"Nebula",
     ra_hours:6.5320,   dec_deg:4.933, zoom:11,
-    img_url:"https://cdn.spacetelescope.org/archives/images/large/opo9919a.jpg",
-    info:"A ring-shaped H II region carved by its central open cluster. Hubble and Spitzer images show sharp boundaries between inner bubble and outer shell. Numerous young stars are detected along dust pillars.", credit_text:"NASA/ESA — Hubble",
-    credit_link:"https://www.nasa.gov/image-article/rosette-nebula/",
+    img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2025/04/STScI-01JQCFC0V5YM5N2EC7NPG9CX6D.tif?w=1997&h=2000&fit=crop&crop=faces%2Cfocalpoint",
+    info:"The Rosette Nebula (NGC 2237/2238/2244) is a large emission nebula located about 5,000 light-years away in the constellation Monoceros. It is shaped like a rose, with a cluster of young, hot stars (NGC 2244) at its center that illuminate the surrounding clouds of hydrogen gas. This stellar nursery is one of the most beautiful examples of star formation, with dark dust lanes and glowing gas forming a striking, flower-like structure.", credit_text:"NASA/ESA — Hubble",
+    credit_link:"https://science.nasa.gov/asset/hubble/rosette-nebula-context-image/",
     more_link:"https://images.nasa.gov/search?q=Rosette%20Nebula&media_type=image", tags:["HII","Cluster"] },
 
-  { id:"ngc3324", name:"NGC 3324 (Carina “Cosmic Cliffs”)", type:"Nebula",
+  { id:"ngc3374", name:"NGC 3374 (Carina Nebula", type:"Nebula",
     ra_hours:10.6167, dec_deg:-58.6333, zoom:11,
-    img_url:"https://stsci-opo.org/STScI-01G77SMZSP8D7J8Y9XQX4SJTFZ.png",
-    info:"Famous as one of JWST’s first-light scenes. Near- and mid-infrared data reveal wave-like “cliff” edges of dust in high detail. The region illustrates how massive star feedback sculpts the environment.", credit_text:"NASA/ESA/CSA — JWST",
-    credit_link:"https://webbtelescope.org/contents/media/images/2022/031/01G77PKB8NKR7S8Z6HBXMYATGJ",
+    img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/missions/webb/science/2022/07/STScI-01GA6KX212MXZGNEBJ55KXK9VQ.png?w=2000&h=1541&fit=crop&crop=faces%2Cfocalpoint",
+    info:"The Carina Nebula (NGC 3372), often called the Cosmic Cliffs, is a massive star-forming region located about 7,600 light-years away in the constellation Carina. The “Cosmic Cliffs” name comes from stunning images taken by the James Webb Space Telescope, showing towering walls of gas and dust that look like mountain ranges. Within these glowing clouds, powerful stellar winds and radiation from young, hot stars are carving out shapes while triggering the birth of new stars.", credit_text:"NASA/ESA",
+    credit_link:"https://science.nasa.gov/asset/webb/cosmic-cliffs-in-the-carina-nebula-nircam-image/",
     more_link:"https://images.nasa.gov/search?q=NGC%203324%20Cosmic%20Cliffs&media_type=image", tags:["StarForming"] },
 
+
+
 /* === YENİ NESNELER — EKLE/APPEND === */
-{
-  id:"ngc3372",
-  name:"NGC 3372 (Carina Nebula)",
-  type:"Nebula",
-  ra_hours:10.752222,   // 10h45m08s
-  dec_deg:-59.866667,   // -59°52′
-  zoom:9,
-  img_url:"",
-  info:"A giant star nursery hosting massive stars like Eta Carinae. Hubble shows dust pillars, wind-blown bubbles, and ionization fronts.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/image/carina-nebula/",
-  more_link:"https://images.nasa.gov/search?q=NGC%203372%20Carina%20Nebula&media_type=image",
-  tags:["HII","StarForming","Carina"]
-},
 {
   id:"ngc3603",
   name:"NGC 3603",
@@ -213,10 +194,10 @@ const OBJECTS = [
   ra_hours:11.251944,   // 11h15m07s
   dec_deg:-61.266667,   // -61°16′
   zoom:11,
-  img_url:"",
-  info:"Hosts one of the most massive young star clusters in the Milky Way. Winds and shocks carve cavities in the surrounding gas.",
+  img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2007/10/STScI-01EVT6WQN1KTWW1TZR0TP78123.tif?w=1942&h=2000&fit=crop&crop=faces%2Cfocalpoint",
+  info:"NGC 3603 is a giant H II region located about 20,000 light-years away in the constellation Carina. It contains one of the most massive visible star clusters in the Milky Way, filled with hot, young, and very luminous stars. Because of its intense star formation activity and dense concentration of massive stars, astronomers often study NGC 3603 as a local example of starburst regions seen in distant galaxies.",
   credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/potw1335a/",
+  credit_link:"https://science.nasa.gov/asset/hubble/full-hubble-acs-image-of-ngc-3603/",
   more_link:"https://images.nasa.gov/search?q=NGC%203603&media_type=image",
   tags:["Cluster","HII","Feedback"]
 },
@@ -227,10 +208,10 @@ const OBJECTS = [
   ra_hours:17.347222,   // 17h20m50s
   dec_deg:-36.100000,   // -36°06′
   zoom:10,
-  img_url:"",
-  info:"Massive star-forming complex with bright near-IR knots. Spitzer/JWST reveal embedded nurseries and filamentary structure.",
+  img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/astro/universe/2023/09/cats-paw-16.jpg?w=1313&h=739&fit=crop&crop=faces%2Cfocalpoint",
+  info:"The Cat’s Paw Nebula (NGC 6334) is a large emission nebula located about 5,500 light-years away in the constellation Scorpius. It gets its name because its glowing clouds of gas and dust resemble the pads of a cat’s paw. This region is one of the most active stellar nurseries in our galaxy, filled with massive young stars that heat the surrounding hydrogen gas, causing it to shine brightly in red.",
   credit_text:"NASA/ESA/CSA",
-  credit_link:"https://www.nasa.gov/image-article/cats-paw-nebula/",
+  credit_link:"https://www.nasa.gov/image-article/newborn-stars-blow-bubbles-cats-paw-nebula/",
   more_link:"https://images.nasa.gov/search?q=NGC%206334%20Cat%E2%80%99s%20Paw&media_type=image",
   tags:["HII","Infrared","Filaments"]
 },
@@ -241,10 +222,10 @@ const OBJECTS = [
   ra_hours:17.411944,   // 17h24m43s
   dec_deg:-34.200000,   // -34°12′
   zoom:10,
-  img_url:"",
-  info:"Filled with bubbles carved by young hot stars. Central clusters emit strong UV that photo-evaporates gas.",
+  img_url:"https://apod.nasa.gov/apod/image/0810/NGC6357_schedler_c800.jpg",
+  info:"The Lobster Nebula (NGC 6357) is a massive star-forming region located about 8,000 light-years away in the constellation Scorpius. Its complex structure of glowing hydrogen gas, dark dust lanes, and bright young stars gives it the appearance of a lobster. Within the nebula lies a cluster of very massive, luminous stars that shape the surrounding clouds with their intense radiation and stellar winds, making it one of the most active nurseries in our galaxy.",
   credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/potw1725a/",
+  credit_link:"https://apod.nasa.gov/apod/ap081009.html",
   more_link:"https://images.nasa.gov/search?q=NGC%206357%20Lobster%20Nebula&media_type=image",
   tags:["HII","Bubbles","UV"]
 },
@@ -255,10 +236,10 @@ const OBJECTS = [
   ra_hours:5.683333,    // 5h41m00s
   dec_deg:-2.450000,    // -2°27′
   zoom:11,
-  img_url:"",
-  info:"Horsehead appears in silhouette against bright H II. Near-IR imaging uncovers dense cores inside the column.",
+  img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2001/04/STScI-01EVT9N8J9MFC404ZFHWFSE869.tif?w=2000&h=1455&fit=crop&crop=faces%2Cfocalpoint",
+  info:"The Horsehead Region consists of IC 434, a bright emission nebula, and Barnard 33, the famous Horsehead Nebula silhouette, located about 1,500 light-years away in the constellation Orion. IC 434 glows red from ionized hydrogen gas, illuminated by the nearby bright star Sigma Orionis. In front of this glowing background, the dark, horse-shaped cloud of Barnard 33 appears in striking contrast, making it one of the most iconic and photographed nebulae in the night sky.",
   credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-49/",
+  credit_link:"https://science.nasa.gov/asset/hubble/the-horsehead-nebula/",
   more_link:"https://images.nasa.gov/search?q=Horsehead%20Nebula%20IC%20434%20B33&media_type=image",
   tags:["DarkNebula","Orion","B33"]
 },
@@ -269,10 +250,10 @@ const OBJECTS = [
   ra_hours:2.545000,    // 2h32m42s
   dec_deg:61.450000,    // +61°27′
   zoom:10,
-  img_url:"",
-  info:"Broad emission nebula with a central young cluster. UV radiation and winds sculpt wave-like gas forms.",
+  img_url:"https://apod.nasa.gov/apod/image/2202/HeartB_Jensen_960.jpg",
+  info:"The Heart Nebula (IC 1805) is a large emission nebula located about 7,500 light-years away in the constellation Cassiopeia. Its shape resembles a human heart, glowing red from hydrogen gas ionized by nearby massive young stars. At its center lies a cluster of hot, newly formed stars (Melotte 15), whose radiation and stellar winds sculpt the surrounding gas and dust, creating intricate structures.",
   credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/image/heart-nebula/",
+  credit_link:"https://apod.nasa.gov/apod/ap220214.html",
   more_link:"https://images.nasa.gov/search?q=IC%201805%20Heart%20Nebula&media_type=image",
   tags:["HII","Cluster","Feedback"]
 },
@@ -283,8 +264,8 @@ const OBJECTS = [
   ra_hours:2.850000,    // 2h51m00s
   dec_deg:60.433333,    // +60°26′
   zoom:10,
-  img_url:"",
-  info:"Large H II complex neighboring the Heart. Infrared data reveal protostars embedded in dust.",
+  img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia13/pia13014/PIA13014.jpg?w=2000&h=1046&fit=crop&crop=faces%2Cfocalpoint",
+  info:"The Soul Nebula (IC 1848) is a vast emission nebula located about 7,500 light-years away in the constellation Cassiopeia, right next to the Heart Nebula. Its glowing clouds of hydrogen gas are shaped into intricate patterns by the radiation and winds from massive young stars forming within. Inside the nebula lies a cluster of newborn stars that continues to fuel the region’s active stellar nursery, making it a striking companion to the Heart Nebula.",
   credit_text:"NASA/ESA",
   credit_link:"https://science.nasa.gov/image/soul-nebula/",
   more_link:"https://images.nasa.gov/search?q=IC%201848%20Soul%20Nebula&media_type=image",
@@ -297,8 +278,8 @@ const OBJECTS = [
   ra_hours:6.150000,    // 6h09m00s
   dec_deg:20.650000,    // +20°39′
   zoom:11,
-  img_url:"",
-  info:"Reflection components and star-forming knots with glowing rims. Young stars sculpt pillar-like shapes.",
+  img_url:"https://cdn.esahubble.org/archives/images/screen/heic1406a.jpg",
+  info:"The Monkey Head Nebula (NGC 2174) is an emission nebula located about 6,400 light-years away in the constellation Orion. It glows red from hydrogen gas that is energized by the intense radiation of young, massive stars forming inside. Its intricate clouds of gas and dust resemble the outline of a monkey’s head, giving the nebula its name, and it remains an active stellar nursery.",
   credit_text:"NASA/ESA",
   credit_link:"https://esahubble.org/images/heic1406a/",
   more_link:"https://images.nasa.gov/search?q=NGC%202174%20Monkey%20Head&media_type=image",
@@ -311,10 +292,10 @@ const OBJECTS = [
   ra_hours:21.650000,   // 21h39m00s
   dec_deg:57.500000,    // +57°30′
   zoom:10,
-  img_url:"",
-  info:"Dark elongated pillar within a large H II region. New stars form in the dense core at the tip.",
+  img_url:"https://apod.nasa.gov/apod/image/2411/LDN1105ElephantTrunk1024.jpg",
+  info:"The Elephant Trunk Nebula (IC 1396A) is a dense concentration of gas and dust within the larger emission nebula IC 1396, located about 2,400 light-years away in the constellation Cepheus. Its long, dark, twisting shape resembles an elephant’s trunk, stretching into the surrounding glowing hydrogen gas. This region is an active stellar nursery, where powerful radiation from nearby massive stars sculpts the trunk-like structure and triggers the birth of new stars inside.",
   credit_text:"NASA/ESA",
-  credit_link:"https://apod.nasa.gov/apod/ap100908.html",
+  credit_link:"https://apod.nasa.gov/apod/ap241121.html",
   more_link:"https://images.nasa.gov/search?q=IC%201396%20Elephant%20Trunk&media_type=image",
   tags:["HII","Pillar","Protostars"]
 },
@@ -325,10 +306,10 @@ const OBJECTS = [
   ra_hours:19.383333,   // 19h23m00s
   dec_deg:14.500000,    // +14°30′
   zoom:10,
-  img_url:"",
-  info:"Giant star-forming region in the Galactic plane. IR data reveal embedded young stars and hot dust.",
+  img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/astro/universe/2023/09/PIA23865.jpg?w=1536&h=864&fit=crop&crop=faces%2Cfocalpoint",
+  info:"The W51 Complex is one of the largest star-forming regions in the Milky Way, located about 17,000 light-years away in the constellation Aquila. It contains vast clouds of gas and dust where massive young stars and clusters are actively forming. Because of its size, brightness, and intense activity, astronomers often study W51 as a nearby example of giant starburst regions found in other galaxies.",
   credit_text:"NASA",
-  credit_link:"https://science.nasa.gov/mission/spitzer/w51/",
+  credit_link:"https://science.nasa.gov/resource/star-factory-w51/",
   more_link:"https://images.nasa.gov/search?q=W51%20complex&media_type=image",
   tags:["MassiveSFR","Infrared","GalacticPlane"]
 },
@@ -339,113 +320,14 @@ const OBJECTS = [
   ra_hours:2.416667,    // 2h25m00s
   dec_deg:62.100000,    // +62°06′
   zoom:10,
-  img_url:"",
-  info:"Active region in the Perseus arm; filaments lined with dense birth cores.",
+  img_url:"https://svs.gsfc.nasa.gov/vis/a030000/a030100/a030142/615062main_W3A_labels_full.jpg",
+  info:"The W3 Complex is a massive star-forming region located about 6,000 light-years away in the constellation Cassiopeia. It is part of a larger molecular cloud complex that also includes W4 and W5, making it one of the most active stellar nurseries in the Perseus Arm of the Milky Way. Within W3, astronomers observe dense clusters of young, massive stars, powerful outflows, and bright emission nebulae, making it a key site for studying how stars and star clusters are born.",
   credit_text:"NASA",
   credit_link:"https://www.nasa.gov/image-article/w3-star-forming-region/",
   more_link:"https://images.nasa.gov/search?q=W3%20star%20forming%20region&media_type=image",
   tags:["Filaments","PerseusArm","Protostars"]
 },
-{
-  id:"w5",
-  name:"W5 (part of Soul Nebula)",
-  type:"Complex",
-  ra_hours:2.983333,    // 2h59m00s
-  dec_deg:60.450000,    // +60°27′
-  zoom:10,
-  img_url:"",
-  info:"Carved bubbles and ionization fronts; ‘hollow’ bubbles surrounded by new star births.",
-  credit_text:"NASA/Spitzer",
-  credit_link:"https://science.nasa.gov/mission/spitzer/soul-nebula-w5/",
-  more_link:"https://images.nasa.gov/search?q=W5%20nebula&media_type=image",
-  tags:["Bubbles","TriggeredSF","Spitzer"]
-},
-{
-  id:"rosette_mc",
-  name:"Rosette Molecular Cloud",
-  type:"Cloud",
-  ra_hours:6.550000,    // 6h33m00s
-  dec_deg:4.500000,     // +4°30′
-  zoom:9,
-  img_url:"",
-  info:"Surrounds the Rosette Nebula with a large gas reservoir. Radio/IR reveal interconnected filaments and young stars.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/image/rosette-nebula/",
-  more_link:"https://images.nasa.gov/search?q=Rosette%20Molecular%20Cloud&media_type=image",
-  tags:["MolecularCloud","Filaments","Rosette"]
-},
 
-/* === YENİ NESNELER — EKLE/APPEND === */
-{
-  id:"rho_oph",
-  name:"Rho Ophiuchi Cloud Complex",
-  type:"Nebula",
-  ra_hours:16.440000,   // ~16h26m
-  dec_deg:-24.383000,   // ~-24°23′
-  zoom:10,
-  img_url:"",
-  info:"One of the closest stellar nurseries to Earth. NASA infrared observations detect proto-stars hidden in dust. Its reddish glow reveals PAH emission and heated dust.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Rho%20Ophiuchi&media_type=image",
-  tags:["StarForming","Infrared","PAH"]
-},
-{
-  id:"m27",
-  name:"M27 (Dumbbell Nebula)",
-  type:"Nebula",
-  ra_hours:20.000000,   // ~20h00m
-  dec_deg:22.720000,    // ~+22°43′
-  zoom:12,
-  img_url:"",
-  info:"Represents the ejected outer layers of a Sun-like star. Hubble shows the central white dwarf and complex shells. Filters reveal oxygen and hydrogen emission distribution.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-27/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2027%20Dumbbell&media_type=image",
-  tags:["PlanetaryNebula","[OIII]","H-alpha"]
-},
-{
-  id:"m57",
-  name:"M57 (Ring Nebula)",
-  type:"Nebula",
-  ra_hours:18.893000,
-  dec_deg:33.028000,
-  zoom:12,
-  img_url:"",
-  info:"Famous for its ring-like appearance of ionized gas. Hubble and spectroscopy reveal how stellar winds shaped its shell. Near-infrared shows faint outer extensions beyond the visible ring.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-57/",
-  more_link:"https://images.nasa.gov/search?q=Ring%20Nebula%20M57&media_type=image",
-  tags:["PlanetaryNebula","Shell","NIR"]
-},
-{
-  id:"m76",
-  name:"M76 (Little Dumbbell)",
-  type:"Nebula",
-  ra_hours:1.700000,    // ~1h42m
-  dec_deg:51.570000,    // ~+51°34′
-  zoom:12,
-  img_url:"",
-  info:"A bipolar planetary nebula with complex lobes. NASA images resolve polar flows and ring-like structures. Chemical tracers reveal stellar evolutionary end products.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-76/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2076&media_type=image",
-  tags:["PlanetaryNebula","Bipolar","Chemistry"]
-},
-{
-  id:"m97",
-  name:"M97 (Owl Nebula)",
-  type:"Nebula",
-  ra_hours:11.233000,   // ~11h14m
-  dec_deg:55.017000,    // ~+55°01′
-  zoom:12,
-  img_url:"",
-  info:"Known for two “eye-like” voids. Hubble shows density variations and rippled edges. The white dwarf keeps the shell glowing and expanding.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-97/",
-  more_link:"https://images.nasa.gov/search?q=Owl%20Nebula%20M97&media_type=image",
-  tags:["PlanetaryNebula","Shell","WhiteDwarf"]
-},
 {
   id:"ngc6543",
   name:"NGC 6543 (Cat’s Eye Nebula)",
@@ -453,10 +335,10 @@ const OBJECTS = [
   ra_hours:17.966000,   // ~17h58m
   dec_deg:66.633000,    // ~+66°38′
   zoom:12,
-  img_url:"",
-  info:"Shows multiple shells and jet-like features. Hubble tracks asymmetrical outflows changing over time. Narrow-band colors provide clues to element abundances.",
+  img_url:"https://science.nasa.gov/wp-content/uploads/2023/04/167321main_image_feature_741_ys_full-jpg.webp",
+  info:"The Cat’s Eye Nebula (NGC 6543) is a well-known planetary nebula located about 3,300 light-years away in the constellation Draco. It was formed when a dying star shed its outer layers, leaving behind complex, glowing shells of gas around a hot central white dwarf. Famous for its intricate structure of concentric rings, knots, and jets, it is considered one of the most detailed and studied planetary nebulae in the sky.",
   credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/wordbank/cats-eye-nebula/",
+  credit_link:"https://science.nasa.gov/missions/hubble/cats-eye-nebula/",
   more_link:"https://images.nasa.gov/search?q=NGC%206543%20Cat%27s%20Eye&media_type=image",
   tags:["PlanetaryNebula","Jets","Abundances"]
 },
@@ -467,10 +349,10 @@ const OBJECTS = [
   ra_hours:21.066000,   // ~21h04m
   dec_deg:-11.367000,   // ~-11°22′
   zoom:12,
-  img_url:"",
-  info:"Named for its Saturn-like ring and extensions. High-resolution data reveal knots and jets in 3D structure. Spectroscopy shows ionization gradients with distance.",
+  img_url:"https://science.nasa.gov/wp-content/uploads/2023/07/caldwell-55.jpg",
+  info:"The Saturn Nebula (NGC 7009) is a bright planetary nebula located about 5,000 light-years away in the constellation Aquarius. It was created when a dying star ejected its outer layers, forming a glowing shell of ionized gas around a hot white dwarf core. Its elongated shape, with extensions on either side that resemble Saturn’s rings, gave the nebula its name and makes it a striking object for astronomical study.",
   credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/opo0532a/",
+  credit_link:"https://science.nasa.gov/image-detail/hubbles-planetary-nebula-gallery-a-view-of-ngc-7009/",
   more_link:"https://images.nasa.gov/search?q=NGC%207009%20Saturn%20Nebula&media_type=image",
   tags:["PlanetaryNebula","Knots","Spectroscopy"]
 },
@@ -481,111 +363,14 @@ const OBJECTS = [
   ra_hours:7.483000,    // ~7h29m
   dec_deg:20.917000,    // ~+20°55′
   zoom:12,
-  img_url:"",
-  info:"Features inner fur-like filaments and outer shells. Hubble shows gas shaped by the hot white dwarf’s UV radiation. Rich details trace late-stage stellar winds.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/potw1206a/",
+  img_url:"https://chandra.harvard.edu/photo/2013/ngc2392/ngc2392_w11.jpg",
+  info:"The Eskimo Nebula, also known as the Clown Face Nebula (NGC 2392), is a planetary nebula located about 2,900 light-years away in the constellation Gemini. It was formed when a dying Sun-like star expelled its outer layers, leaving behind a hot white dwarf at the center. The nebula’s unusual appearance, with a bright inner region surrounded by a halo of filamentary gas, gives it the look of a face wrapped in a fur-lined hood, which inspired its nickname.",
+  credit_text:"NASA/ESA/HARVARD/CHANDRA",
+  credit_link:"https://chandra.harvard.edu/photo/2013/ngc2392/",
   more_link:"https://images.nasa.gov/search?q=NGC%202392%20Eskimo%20Nebula&media_type=image",
   tags:["PlanetaryNebula","Filaments","UV"]
 },
-{
-  id:"ngc7027",
-  name:"NGC 7027",
-  type:"Nebula",
-  ra_hours:21.116000,   // ~21h07m
-  dec_deg:42.233000,    // ~+42°14′
-  zoom:12,
-  img_url:"",
-  info:"A young, dense planetary nebula. NASA infrared reveals dust-rich interiors and molecular components. Expansion and morphology mark its evolutionary stage.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-5/",
-  more_link:"https://images.nasa.gov/search?q=NGC%207027&media_type=image",
-  tags:["PlanetaryNebula","Infrared","Molecules"]
-},
-{
-  id:"ngc7293",
-  name:"NGC 7293 (Helix Nebula)",
-  type:"Nebula",
-  ra_hours:22.483000,   // ~22h29m
-  dec_deg:-20.800000,   // ~-20°48′
-  zoom:11,
-  img_url:"",
-  info:"One of the largest planetary nebulae in the sky. Its rim hosts unusual knots and filaments. NASA images illustrate the future of Sun-like stars.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-63/",
-  more_link:"https://images.nasa.gov/search?q=Helix%20Nebula%20NGC%207293&media_type=image",
-  tags:["PlanetaryNebula","Knots","Filaments"]
-},
-{
-  id:"ngc2818",
-  name:"NGC 2818",
-  type:"Nebula",
-  ra_hours:9.266000,    // ~9h16m
-  dec_deg:-36.617000,   // ~-36°37′
-  zoom:12,
-  img_url:"",
-  info:"A planetary nebula seen within an open cluster. It has multi-shell, knotty structure. Hubble shows shells expanding at different speeds.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/opo0913a/",
-  more_link:"https://images.nasa.gov/search?q=NGC%202818&media_type=image",
-  tags:["PlanetaryNebula","OpenCluster","Knots"]
-},
-{
-  id:"ngc2440",
-  name:"NGC 2440",
-  type:"Nebula",
-  ra_hours:7.683000,    // ~7h41m
-  dec_deg:-18.200000,   // ~-18°12′
-  zoom:12,
-  img_url:"",
-  info:"An irregular, high-excitation planetary nebula. Spectra reveal a very hot central star. Hubble resolves sharp filamentary structures.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/opo0307a/",
-  more_link:"https://images.nasa.gov/search?q=NGC%202440&media_type=image",
-  tags:["PlanetaryNebula","HighExcitation","Filaments"]
-},
-{
-  id:"ngc3132",
-  name:"NGC 3132 (Southern Ring Nebula)",
-  type:"Nebula",
-  ra_hours:10.116000,   // ~10h07m
-  dec_deg:-40.433000,   // ~-40°26′
-  zoom:11,
-  img_url:"",
-  info:"Imaged jointly by JWST and Hubble. Shows multi-shell structure and signs of a central binary. Dust and gas separation appear differently across wavelengths.",
-  credit_text:"NASA/ESA/CSA",
-  credit_link:"https://webbtelescope.org/contents/media/images/2022/033/01G77PKB8NKR7S8Z6HBXMYA1WG",
-  more_link:"https://images.nasa.gov/search?q=NGC%203132%20Southern%20Ring&media_type=image",
-  tags:["PlanetaryNebula","JWST","Binary"]
-},
-{
-  id:"ngc6326",
-  name:"NGC 6326",
-  type:"Nebula",
-  ra_hours:17.333000,   // ~17h20m
-  dec_deg:-51.750000,   // ~-51°45′
-  zoom:12,
-  img_url:"",
-  info:"Shows striking asymmetries and knotty filaments. Narrow-band imaging maps element distributions. Stellar winds create complex morphology.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/potw1130a/",
-  more_link:"https://images.nasa.gov/search?q=NGC%206326&media_type=image",
-  tags:["PlanetaryNebula","Asymmetric","Narrowband"]
-},
-{
-  id:"ngc3918",
-  name:"NGC 3918",
-  type:"Nebula",
-  ra_hours:11.833000,   // ~11h50m
-  dec_deg:-57.183000,   // ~-57°11′
-  zoom:12,
-  img_url:"",
-  info:"Known for its bright core and puffed outer shells. Hubble reveals fine rippled edges. Its chemical richness reflects late stellar evolution.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/potw1413a/",
-  more_link:"https://images.nasa.gov/search?q=NGC%203918&media_type=image",
-  tags:["PlanetaryNebula","Ripples","Chemistry"]
-},
+
 {
   id:"abell39",
   name:"Abell 39",
@@ -593,10 +378,10 @@ const OBJECTS = [
   ra_hours:16.450000,   // ~16h27m
   dec_deg:27.900000,    // ~+27°54′
   zoom:12,
-  img_url:"",
-  info:"A nearly perfect spherical planetary nebula. Its faint, uniform shell shows smooth expansion. Ideal for testing stellar mass-loss processes.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
+  img_url:"https://apod.nasa.gov/apod/image/1210/abell39_block_960.jpg",
+  info:"Abell 39 is a nearly perfect spherical planetary nebula located about 7,000 light-years away in the constellation Hercules. It was formed when a dying star ejected its outer layers, creating a faint, bubble-like shell of glowing gas around a central hot white dwarf. Its symmetry and large size (about five light-years across) make it one of the most striking examples of a spherical planetary nebula.",
+  credit_text:"NASA/ESA/",
+  credit_link:"https://apod.nasa.gov/apod/ap121008.html",
   more_link:"https://images.nasa.gov/search?q=Abell%2039&media_type=image",
   tags:["PlanetaryNebula","Spherical","FaintShell"]
 },
@@ -607,9 +392,9 @@ const OBJECTS = [
   ra_hours:16.683000,   // ~16h41m
   dec_deg:36.467000,    // ~+36°28′
   zoom:12,
-  img_url:"",
-  info:"One of the brightest globular clusters in the Milky Way. Hubble resolves tightly packed central stars. Metal-poor, old stars provide clues to galactic history.",
-  credit_text:"NASA/ESA",
+  img_url:"https://science.nasa.gov/wp-content/uploads/2023/04/m13-xlarge_web-jpg.webp",
+  info:"The Hercules Cluster (M13) is a globular star cluster located about 22,000 light-years away in the constellation Hercules. It contains several hundred thousand stars packed into a relatively small region, many of them very old, dating back nearly 12 billion years. Because of its brightness and rich population of stars, M13 is one of the most famous and easily observed globular clusters in the northern sky.",
+  credit_text:"NASA",
   credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-13/",
   more_link:"https://images.nasa.gov/search?q=Messier%2013&media_type=image",
   tags:["Globular","OldStars","MetalPoor"]
@@ -621,8 +406,8 @@ const OBJECTS = [
   ra_hours:21.500000,   // ~21h30m
   dec_deg:12.167000,    // ~+12°10′
   zoom:12,
-  img_url:"",
-  info:"A dense-core globular cluster. Hubble probes core dynamics and possible black hole candidates. Low metallicity traces early stellar chemistry.",
+  img_url:"https://science.nasa.gov/wp-content/uploads/2023/04/heic1321a-jpg.webp",
+  info:"M15 is a bright globular star cluster located about 33,000 light-years away in the constellation Pegasus. It contains more than 100,000 stars, many of them very old, and is one of the densest known clusters in the Milky Way. Astronomers have found evidence of a central black hole or dense mass in M15, making it a fascinating object for studying the dynamics of star clusters.",
   credit_text:"NASA/ESA",
   credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-15/",
   more_link:"https://images.nasa.gov/search?q=Messier%2015&media_type=image",
@@ -635,8 +420,8 @@ const OBJECTS = [
   ra_hours:13.700000,   // ~13h42m
   dec_deg:28.383000,    // ~+28°23′
   zoom:12,
-  img_url:"",
-  info:"Rich in RR Lyrae variables. Hubble and ground-based time-series data calibrate its age and distance. Collapsed core reflects dynamic evolution.",
+  img_url:"https://science.nasa.gov/wp-content/uploads/2023/04/m3-jpg.webp?resize=1536,1502",
+  info:"M3 is a globular star cluster located about 34,000 light-years away in the constellation Canes Venatici. It contains around half a million stars, many of them among the oldest in the Milky Way, estimated to be about 11–12 billion years old. M3 is especially famous for having one of the largest known populations of variable stars, particularly RR Lyrae variables, which are important for studying stellar evolution and measuring cosmic distances.",
   credit_text:"NASA/ESA",
   credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-3/",
   more_link:"https://images.nasa.gov/search?q=Messier%203&media_type=image",
@@ -649,8 +434,8 @@ const OBJECTS = [
   ra_hours:15.300000,   // ~15h18m
   dec_deg:2.083000,     // ~+2°05′
   zoom:12,
-  img_url:"",
-  info:"A bright, extended globular cluster. HST photometry traces stellar sequences on main and horizontal branches. Chemical studies show multiple populations.",
+  img_url:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-5/",
+  info:"M5 is a globular star cluster located about 24,500 light-years away in the constellation Serpens. It is one of the largest known globular clusters, containing around half a million stars spread across a diameter of about 165 light-years. With an estimated age of 12–13 billion years, M5 is also among the oldest clusters in the Milky Way, making it an important object for studying the early history of our galaxy.",
   credit_text:"NASA/ESA",
   credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-5/",
   more_link:"https://images.nasa.gov/search?q=Messier%205&media_type=image",
@@ -665,83 +450,14 @@ const OBJECTS = [
   ra_hours:6.15,
   dec_deg:24.333333,
   zoom:12,
-  img_url:"",
-  info:"A rich cluster in Gemini. Photometry separates members by mass. Shares a view with NGC 2158.",
+  img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/stars/open-clusters/Hubble_M35_WFPC2_inset.jpg?w=1200&h=927&fit=crop&crop=faces%2Cfocalpoint",
+  info:"M35 is an open star cluster located about 3,800 light-years away in the constellation Gemini. It contains several thousand stars spread across a region about 24 light-years wide, many of them relatively young compared to those in globular clusters. Its loose, sparkling arrangement makes M35 a beautiful object for observation with binoculars or small telescopes, and it lies near the smaller, older cluster NGC 2158.",
   credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
+  credit_link:"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-35/",
   more_link:"https://images.nasa.gov/search?q=Messier%2035&media_type=image",
   tags:["OpenCluster","Gemini"]
 },
-{
-  id:"m36",
-  name:"M36",
-  type:"Cluster",
-  ra_hours:5.6,
-  dec_deg:34.133333,
-  zoom:12,
-  img_url:"",
-  info:"One of the Auriga trio. Reddening affects young stars’ colors. Mass function probes dynamics.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2036&media_type=image",
-  tags:["OpenCluster","Auriga"]
-},
-{
-  id:"m37",
-  name:"M37",
-  type:"Cluster",
-  ra_hours:5.866667,
-  dec_deg:32.55,
-  zoom:12,
-  img_url:"",
-  info:"The richest Auriga cluster. Hubble resolves faint stars in its dense core. Shows mass segregation.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2037&media_type=image",
-  tags:["OpenCluster","Auriga","MassSegregation"]
-},
-{
-  id:"m38",
-  name:"M38",
-  type:"Cluster",
-  ra_hours:5.466667,
-  dec_deg:35.85,
-  zoom:12,
-  img_url:"",
-  info:"A more spread-out Auriga cluster. Color-magnitude sequence shows intermediate age. Core less concentrated.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2038&media_type=image",
-  tags:["OpenCluster","Auriga"]
-},
-{
-  id:"m41",
-  name:"M41",
-  type:"Cluster",
-  ra_hours:6.766667,
-  dec_deg:-20.733333,
-  zoom:12,
-  img_url:"",
-  info:"Easily seen in Canis Major’s winter sky. Contains many bright stars. Ages measured in hundreds of millions of years.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2041&media_type=image",
-  tags:["OpenCluster","CanisMajor"]
-},
-{
-  id:"m23",
-  name:"M23",
-  type:"Cluster",
-  ra_hours:17.95,
-  dec_deg:-18.983333,
-  zoom:12,
-  img_url:"",
-  info:"A sparse Sagittarius arm cluster. Members include red giants. Foreground clouds complicate analysis.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2023&media_type=image",
-  tags:["OpenCluster","Sagittarius"]
-},
+
 {
   id:"m25",
   name:"M25",
@@ -749,55 +465,14 @@ const OBJECTS = [
   ra_hours:18.516667,
   dec_deg:-19.25,
   zoom:12,
-  img_url:"",
-  info:"A loose Sagittarius plane cluster. Membership refined by Gaia astrometry. Reddening from dust affects colors.",
+  img_url:"https://apod.nasa.gov/apod/image/0908/m25_cfht.jpg",
+  info:"M25 is an open star cluster located about 2,000 light-years away in the constellation Sagittarius. It contains around 600 stars spread over a region about 20 light-years across, including several bright giant stars. With an estimated age of about 90 million years, M25 is a relatively young cluster and can be seen easily with binoculars under dark skies.",
   credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
+  credit_link:"https://apod.nasa.gov/apod/ap090831.html",
   more_link:"https://images.nasa.gov/search?q=Messier%2025&media_type=image",
   tags:["OpenCluster","Sagittarius","Gaia"]
 },
-{
-  id:"m50",
-  name:"M50",
-  type:"Cluster",
-  ra_hours:7.05,
-  dec_deg:-8.333333,
-  zoom:12,
-  img_url:"",
-  info:"A young Monoceros cluster. Includes sub-dwarfs. Surrounding nebulosity traces origins.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2050&media_type=image",
-  tags:["OpenCluster","Monoceros"]
-},
-{
-  id:"m52",
-  name:"M52",
-  type:"Cluster",
-  ra_hours:23.4,
-  dec_deg:61.583333,
-  zoom:12,
-  img_url:"",
-  info:"A bright northern cluster. Young, OB stars dominate. Dust shifts member colors red.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2052&media_type=image",
-  tags:["OpenCluster","OB","Dust"]
-},
-{
-  id:"m67",
-  name:"M67",
-  type:"Cluster",
-  ra_hours:8.85,
-  dec_deg:11.816667,
-  zoom:12,
-  img_url:"",
-  info:"An open cluster near the Sun’s age, ideal for testing solar analogs. Rotation and temperature studies; white dwarfs as chronometers.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=Messier%2067&media_type=image",
-  tags:["OpenCluster","SolarAnalog","WhiteDwarfs"]
-},
+
 {
   id:"ngc869",
   name:"NGC 869 (h Persei)",
@@ -805,10 +480,10 @@ const OBJECTS = [
   ra_hours:2.316667,
   dec_deg:57.15,
   zoom:11,
-  img_url:"",
-  info:"Part of a double cluster. Rich in young OB stars. Likely common origin with χ Persei.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
+  img_url:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/H_and_%CF%87_Persei.jpg/1024px-H_and_%CF%87_Persei.jpg",
+  info:"NGC 869, also known as h Persei, is part of the famous Double Cluster in the constellation Perseus, along with NGC 884 (χ Persei). It is an open star cluster located about 7,500 light-years away and is estimated to be around 14 million years old. Containing thousands of young, hot, massive stars, NGC 869 shines brightly against the Milky Way background and is a spectacular sight in binoculars and telescopes, especially when viewed together with its companion cluster.",
+  credit_text:"WIKIPEDIA/NASA",
+  credit_link:"https://en.wikipedia.org/wiki/NGC_869",
   more_link:"https://images.nasa.gov/search?q=NGC%20869%20h%20Persei&media_type=image",
   tags:["OpenCluster","DoubleCluster","OB"]
 },
@@ -819,10 +494,10 @@ const OBJECTS = [
   ra_hours:2.366667,
   dec_deg:57.133333,
   zoom:11,
-  img_url:"",
-  info:"The twin of h Persei. Spectroscopy probes massive stellar winds; part of a broad OB association.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://science.nasa.gov/",
+  img_url:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Double_Cluster.jpg/1280px-Double_Cluster.jpg",
+  info:"NGC 884, also known as χ Persei, is the companion cluster to NGC 869 in the famous Double Cluster in the constellation Perseus. Located about 7,500 light-years away, it is slightly younger than its neighbor, with an estimated age of around 12.5 million years. This open star cluster contains thousands of hot, massive blue-white stars, making the Double Cluster a breathtaking sight in binoculars and telescopes, especially against the rich Milky Way background.",
+  credit_text:"WIKIPEDIA/NASA",
+  credit_link:"https://en.wikipedia.org/wiki/NGC_884",
   more_link:"https://images.nasa.gov/search?q=NGC%20884%20chi%20Persei&media_type=image",
   tags:["OpenCluster","DoubleCluster","OB"]
 },
@@ -833,10 +508,10 @@ const OBJECTS = [
   ra_hours:6.516667,
   dec_deg:4.933333,
   zoom:11,
-  img_url:"",
-  info:"Young cluster inside the Rosette Nebula. Member UV radiation carved a vast bubble; sharp edges visible in Hubble images.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://www.nasa.gov/image-article/rosette-nebula/",
+  img_url:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Rosette_Nebula_in_Monoceros.jpg/500px-Rosette_Nebula_in_Monoceros.jpg",
+  info:"The Rosette Cluster (NGC 2244) is an open star cluster located at the heart of the Rosette Nebula in the constellation Monoceros. It lies about 5,200 light-years away and is composed of hot, young O- and B-type stars that were born from the surrounding nebula. These massive stars emit strong radiation and stellar winds that both illuminate the Rosette Nebula and shape its structure, making the cluster a key driver of the nebula’s ongoing star formation.",
+  credit_text:"NASA/WIKIPEDIA/ESA",
+  credit_link:"https://en.wikipedia.org/wiki/NGC_2244",
   more_link:"https://images.nasa.gov/search?q=NGC%202244%20Rosette%20Cluster&media_type=image",
   tags:["OpenCluster","Rosette","UV"]
 },
@@ -847,26 +522,12 @@ const OBJECTS = [
   ra_hours:18.066667,
   dec_deg:-24.35,
   zoom:11,
-  img_url:"",
-  info:"Young stars born in M8. Infrared reveals embedded low-mass members; stellar winds disperse gas.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://www.nasa.gov/image-article/lagoon-nebula-undersea-world/",
+  img_url:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Hubble_NGC6530.jpg/800px-Hubble_NGC6530.jpg",
+  info:"NGC 6530, also known as the Lagoon Cluster, is an open star cluster embedded within the Lagoon Nebula (M8) in the constellation Sagittarius. It lies about 4,350 light-years away and is composed of hundreds of young, hot stars that recently formed from the surrounding nebula. The intense radiation and stellar winds from these stars illuminate and shape the Lagoon Nebula, making NGC 6530 one of the most active and visually stunning star-forming regions in our galaxy.",
+  credit_text:"NASA/ESA/WIKIPEDIA/HUBBLE",
+  credit_link:"https://en.wikipedia.org/wiki/NGC_6530",
   more_link:"https://images.nasa.gov/search?q=NGC%206530%20cluster&media_type=image",
   tags:["OpenCluster","Lagoon","Infrared"]
-},
-{
-  id:"ngc6611",
-  name:"NGC 6611 (Eagle Cluster)",
-  type:"Cluster",
-  ra_hours:18.316667,
-  dec_deg:-13.783333,
-  zoom:11,
-  img_url:"",
-  info:"Core of M16. Members ionize the Pillars of Creation; multi-wavelength data reveal protoplanetary disks.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://esahubble.org/images/heic1501a/",
-  more_link:"https://images.nasa.gov/search?q=NGC%206611%20Eagle%20Cluster&media_type=image",
-  tags:["OpenCluster","M16","Proplyds"]
 },
 {
   id:"cas_a",
@@ -875,9 +536,9 @@ const OBJECTS = [
   ra_hours:23.39,
   dec_deg:58.815,
   zoom:9,
-  img_url:"",
-  info:"A young, bright supernova remnant. Chandra maps explosion elements; time-series track shock expansion.",
-  credit_text:"NASA/Chandra",
+  img_url:"https://chandra.harvard.edu/photo/2013/casa/casa_525.jpg",
+  info:"Cassiopeia A (Cas A) is one of the youngest known supernova remnants in the Milky Way, located about 11,000 light-years away in the constellation Cassiopeia. The explosion that created it is thought to have occurred roughly 350 years ago as seen from Earth, though the light likely reached us around the late 1600s. Cas A is famous for its expanding shell of gas and dust, enriched with heavy elements like oxygen and silicon, and is a key object for studying how massive stars end their lives and seed the galaxy with the building blocks for new stars and planets.",
+  credit_text:"NASA/CHANDRA/HARVARD",
   credit_link:"https://chandra.harvard.edu/photo/2013/casa/",
   more_link:"https://images.nasa.gov/search?q=Cassiopeia%20A&media_type=image",
   tags:["SNR","Chandra","Shocks"]
@@ -889,9 +550,9 @@ const OBJECTS = [
   ra_hours:0.422222,
   dec_deg:64.133333,
   zoom:9,
-  img_url:"",
-  info:"Historical Type Ia SNR. Chandra shows fine structures of forward/reverse shocks; element mapping constrains explosion physics.",
-  credit_text:"NASA/Chandra",
+  img_url:"https://chandra.harvard.edu/photo/2019/tycho/tycho_w11.jpg",
+  info:"Tycho’s Supernova Remnant (SN 1572) is the expanding shell of gas and dust left behind from a supernova observed in 1572 in the constellation Cassiopeia. This explosion was a Type Ia supernova, caused when a white dwarf star in a binary system accumulated too much material and collapsed, producing an extremely bright event visible to the naked eye for months. Today, Tycho SNR appears as an expanding, turbulent cloud of high-energy gas about 8,000 light-years away, and it continues to be studied as an important laboratory for understanding stellar explosions and the enrichment of the interstellar medium.",
+  credit_text:"NASA/CHANDRA/HARVARD",
   credit_link:"https://chandra.harvard.edu/photo/2019/tycho/",
   more_link:"https://images.nasa.gov/search?q=Tycho%20SNR&media_type=image",
   tags:["SNR","TypeIa","Shocks"]
@@ -903,9 +564,9 @@ const OBJECTS = [
   ra_hours:17.511667,
   dec_deg:-21.483333,
   zoom:9,
-  img_url:"",
-  info:"Type Ia remnant in the plane. X-ray spectroscopy reveals iron-rich ejecta; optical filaments show environmental interaction.",
-  credit_text:"NASA/Chandra",
+  img_url:"https://chandra.harvard.edu/photo/2013/kepler/kepler_w11.jpg",
+  info:"Kepler’s Supernova Remnant (SN 1604) is the remnant of a supernova explosion first observed in 1604 in the constellation Ophiuchus. It was a Type Ia supernova, caused by the thermonuclear explosion of a white dwarf star, and it was so bright that it was visible to the naked eye for weeks, even during the day. Today, Kepler SNR lies about 20,000 light-years away and appears as an expanding, turbulent shell of hot gas and dust, making it an important object for studying the life cycles of stars and the enrichment of the interstellar medium.",
+  credit_text:"NASA/CHANDRA/HARVARD",
   credit_link:"https://chandra.harvard.edu/photo/2013/kepler/",
   more_link:"https://images.nasa.gov/search?q=Kepler%20SNR&media_type=image",
   tags:["SNR","TypeIa","Ejecta"]
@@ -917,24 +578,24 @@ const OBJECTS = [
   ra_hours:8.583333,
   dec_deg:-45.166667,
   zoom:9,
-  img_url:"",
-  info:"Nearby, large remnant with filaments. Multi-wavelength data reveal turbulence; contains the Vela Pulsar.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://www.nasa.gov/image-article/vela-supernova-remnant/",
+  img_url:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Vela_supernova_-_VST_-_Eso2214a.jpg/500px-Vela_supernova_-_VST_-_Eso2214a.jpg",
+  info:"The Vela Supernova Remnant (Vela SNR) is the expanding shell of gas and dust left behind by a supernova that exploded about 11,000 years ago in the constellation Vela. It lies roughly 800 light-years away, making it one of the closest known supernova remnants to Earth. The explosion also created the Vela Pulsar, a rapidly rotating neutron star that emits beams of radiation, while the remnant itself spans an area of the sky almost 8 times the diameter of the full Moon, making it a vast and important object for studying stellar death and shockwave interactions in space.",
+  credit_text:"NASA/ESA/WIKIPEDIA/ESO",
+  credit_link:"https://www.eso.org/public/news/eso2214/",
   more_link:"https://images.nasa.gov/search?q=Vela%20SNR&media_type=image",
   tags:["SNR","Pulsar","Filaments"]
 },
 {
   id:"veil_cygnus_loop",
-  name:"Cygnus Loop / Veil",
+  name:"Cygnus Loop",
   type:"SNR",
   ra_hours:20.85,
   dec_deg:31.05,
   zoom:9,
-  img_url:"",
-  info:"Old, wide shock shell. NASA images highlight magnetic-field-aligned filaments; regions show varied shock speeds.",
+  img_url:"https://www.nasa.gov/wp-content/uploads/2023/03/633189main_pia15415-full_full.jpg",
+  info:"The Cygnus Loop, also known as the Veil Nebula, is a large supernova remnant located about 2,400 light-years away in the constellation Cygnus. It was formed by the explosion of a massive star around 10,000–20,000 years ago, and today it spans over 100 light-years across. The remnant appears as delicate, filamentary structures of glowing gas, with famous sections including the Eastern Veil (NGC 6992), Western Veil (NGC 6960), and Pickering’s Triangle, making it a stunning and widely studied object in the night sky.",
   credit_text:"NASA/ESA",
-  credit_link:"https://www.nasa.gov/image-article/veil-nebula/",
+  credit_link:"https://www.nasa.gov/image-article/cygnus-loop-nebula/",
   more_link:"https://images.nasa.gov/search?q=Veil%20Nebula%20Cygnus%20Loop&media_type=image",
   tags:["SNR","Filaments","MagneticFields"]
 },
@@ -945,29 +606,14 @@ const OBJECTS = [
   ra_hours:6.283333,
   dec_deg:22.516667,
   zoom:10,
-  img_url:"",
-  info:"A remnant interacting with a molecular cloud. Infrared shows shock-heated dust; such collisions link to cosmic-ray acceleration.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://www.nasa.gov/image-article/ic-443-jellyfish-nebula/",
+  img_url:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/IC443_Final_with_copyright.jpg/1280px-IC443_Final_with_copyright.jpg",
+  info:"The Jellyfish Nebula (IC 443) is a supernova remnant located about 5,000 light-years away in the constellation Gemini. It was formed by the explosion of a massive star tens of thousands of years ago, and today it appears as a complex network of glowing filaments of gas and dust. IC 443 is also notable because it harbors a neutron star left behind from the supernova, and astronomers study it to understand how supernova shockwaves interact with surrounding molecular clouds.",
+  credit_text:"NASA/ESA/WIKIPEDIA",
+  credit_link:"https://science.nasa.gov/3d-resources/ic-443-jellyfish-nebula/",
   more_link:"https://images.nasa.gov/search?q=IC%20443%20Jellyfish&media_type=image",
   tags:["SNR","MolecularCloud","IR"]
 },
 
-/* === YENİ NESNELER — EKLE/APPEND === */
-{
-  id:"w44",
-  name:"W44",
-  type:"SNR",
-  ra_hours:18.933333,   // ~18h56m
-  dec_deg:1.300000,     // ~+01°18′
-  zoom:9,
-  img_url:"",
-  info:"A remnant embedded in a dense environment. X-ray and radio separate pre- and post-shock regions. Molecular emissions support cloud interaction.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
-  more_link:"https://images.nasa.gov/search?q=W44%20supernova%20remnant&media_type=image",
-  tags:["SNR","MolecularCloud","Shocks"]
-},
 {
   id:"w49b",
   name:"W49B",
@@ -975,10 +621,10 @@ const OBJECTS = [
   ra_hours:19.185278,   // 19h11m07s
   dec_deg:9.100000,     // ~+09°06′
   zoom:9,
-  img_url:"",
-  info:"An asymmetric remnant. Chandra shows irregular element distributions; explosion geometry may be unusual.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
+  img_url:"https://chandra.harvard.edu/photo/2013/w49b/w49b_w11.jpg",
+  info:"W49B is a supernova remnant located about 26,000 light-years away near the Galactic center in the constellation Aquila. It is unusual because of its highly asymmetric, barrel-shaped structure, thought to be the result of a powerful jet-driven explosion. X-ray and infrared observations show irregular distributions of heavy elements like iron and nickel, suggesting that W49B may have been created by one of the most energetic and rare types of supernovae, possibly even linked to gamma-ray bursts.",
+  credit_text:"NASA/CHANDRA/HARVARD",
+  credit_link:"https://chandra.harvard.edu/photo/2013/w49b/",
   more_link:"https://images.nasa.gov/search?q=W49B&media_type=image",
   tags:["SNR","Asymmetric","Abundances"]
 },
@@ -989,10 +635,10 @@ const OBJECTS = [
   ra_hours:2.093889,    // 02h05m38s
   dec_deg:64.816667,    // +64°49′
   zoom:10,
-  img_url:"",
-  info:"Contains a young pulsar wind nebula. X-rays show filaments and knots; the central pulsar injects energy.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
+  img_url:"https://chandra.harvard.edu/photo/2004/3c58/3c58_xray_420.jpg",
+  info:"3C 58 is a supernova remnant located about 10,000 light-years away in the constellation Cassiopeia. It is believed to be the remnant of a supernova observed in 1181 CE, although its age is still debated. At its center lies a rapidly spinning neutron star, the 3C 58 pulsar, which powers a bright pulsar wind nebula filled with filaments and knots of energized gas, making it a fascinating object for studying the life cycle of massive stars and the physics of pulsars.",
+  credit_text:"NASA/CHANDRA/HARVARD",
+  credit_link:"https://chandra.harvard.edu/photo/2004/3c58/",
   more_link:"https://images.nasa.gov/search?q=3C%2058&media_type=image",
   tags:["Pulsar","PWN","Filaments"]
 },
@@ -1003,10 +649,10 @@ const OBJECTS = [
   ra_hours:8.383333,    // ~08h23m
   dec_deg:-42.983333,   // ~-42°59′
   zoom:9,
-  img_url:"",
-  info:"A fragmented remnant. X-rays resolve multi-temperature plasmas; foreground absorption complicates analysis.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
+  img_url:"https://chandra.harvard.edu/photo/2006/puppisa/puppisa_420.jpg",
+  info:"Puppis A is a bright supernova remnant located about 7,000 light-years away in the constellation Puppis. It is the remains of a star that exploded around 3,700 years ago, and today it spans over 60 light-years across. X-ray observations reveal a highly fragmented structure with regions of different temperatures, while optical images show intricate filaments, making Puppis A an important object for studying how supernova shockwaves interact with the interstellar medium.",
+  credit_text:"NASA/CHANDRA HARVARD",
+  credit_link:"https://chandra.harvard.edu/photo/2006/puppisa/",
   more_link:"https://images.nasa.gov/search?q=Puppis%20A&media_type=image",
   tags:["SNR","Xray","Absorption"]
 },
@@ -1017,10 +663,10 @@ const OBJECTS = [
   ra_hours:11.400000,   // ~11h24m
   dec_deg:-59.250000,   // ~-59°15′
   zoom:9,
-  img_url:"",
-  info:"An oxygen-rich core-collapse remnant. Chandra maps individual element knots; young age confirmed dynamically.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
+  img_url:"https://www.nasa.gov/wp-content/uploads/2023/03/g292_v2_1.png",
+  info:"G292.0+1.8 is a young, oxygen-rich supernova remnant located about 20,000 light-years away in the constellation Centaurus. It is the result of a massive star that exploded roughly 1,500–2,000 years ago, making it one of the few known remnants where freshly created heavy elements can be studied in detail. X-ray and optical observations reveal bright knots of oxygen, neon, and other elements, while a central pulsar and pulsar wind nebula provide further insight into the powerful processes following a supernova explosion.",
+  credit_text:"NASA/CHANDRA",
+  credit_link:"https://www.nasa.gov/image-article/chandra-celebrates-15th-anniversary-supernova-remnant-g292-01-8/",
   more_link:"https://images.nasa.gov/search?q=G292.0%2B1.8&media_type=image",
   tags:["SNR","OxygenRich","CoreCollapse"]
 },
@@ -1031,40 +677,12 @@ const OBJECTS = [
   ra_hours:14.716667,   // ~14h43m
   dec_deg:-62.466667,   // ~-62°28′
   zoom:9,
-  img_url:"",
-  info:"Possibly the oldest recorded supernova. X-rays show fast shocks forming a wide shell; speeds match historical records.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
+  img_url:"https://wise.ssl.berkeley.edu/gallery_images/B-RCW86-IR-Xray-med.jpg",
+  info:"RCW 86, also known as SN 185, is the remnant of the oldest recorded supernova, observed by Chinese astronomers in 185 CE. It is located about 8,000 light-years away in the constellation Circinus and spans nearly 100 light-years across. X-ray and optical observations reveal a large, shell-like structure formed by the supernova shockwave, and measurements show extremely fast shock speeds that match historical records, making RCW 86 a key object for connecting ancient observations with modern astrophysics.",
+  credit_text:"NASA/CHANDRA/WISE",
+  credit_link:"https://wise.ssl.berkeley.edu/gallery_RCW86.html",
   more_link:"https://images.nasa.gov/search?q=RCW%2086&media_type=image",
   tags:["SNR","Historic","FastShocks"]
-},
-{
-  id:"sn1006",
-  name:"SN 1006",
-  type:"SNR",
-  ra_hours:15.033333,   // ~15h02m
-  dec_deg:-41.933333,   // ~-41°56′
-  zoom:9,
-  img_url:"",
-  info:"The brightest recorded supernova remnant. Radio and X-rays trace shock acceleration; large size enables detailed study.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
-  more_link:"https://images.nasa.gov/search?q=SN%201006%20remnant&media_type=image",
-  tags:["SNR","ShockAccel","LargeShell"]
-},
-{
-  id:"g1_9p0_3",
-  name:"G1.9+0.3",
-  type:"SNR",
-  ra_hours:17.812500,   // 17h48m45s
-  dec_deg:-27.166667,   // -27°10′
-  zoom:9,
-  img_url:"",
-  info:"Youngest Milky Way remnant candidate. Time-lapse X-rays directly show expansion; near the Galactic Center.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
-  more_link:"https://images.nasa.gov/search?q=G1.9%2B0.3&media_type=image",
-  tags:["SNR","Young","Expansion"]
 },
 {
   id:"kes75",
@@ -1253,9 +871,7 @@ const OBJECTS = [
 
 ];
 
-/* ================================
-   2) WWT BAŞLAT — KOORDİNAT MODU DÜZELTİLDİ
-================================== */
+
 let wwt, script_interface, rafId;
 function initWWT(){
   const builder = new wwtlib.WWTControlBuilder("wwtcanvas");
@@ -1266,7 +882,6 @@ function initWWT(){
 function onReady(){
   wwt = wwtlib.WWTControl.singleton;
 
-  // Arka plan: Gaia; takımyıldız/grid kapalı; ***GALACTIC MODE KAPALI***
   wwt.setBackgroundImageByName("Gaia");
   const S = (wwtlib.Settings && wwtlib.Settings.get_active) ? wwtlib.Settings.get_active() : null;
   if (S){
@@ -1277,13 +892,11 @@ function onReady(){
     if (typeof S.set_galacticMode==="function") S.set_galacticMode(false); // <-- önemli
   }
 
-  // Genel görünüm
   wwt.gotoRADecZoom(0,0,360,false);
 
-  // Liste ve markerlar
   buildList();
   buildMarkers();
-  trackMarkers(); // sürekli ekranda doğru noktada tut
+  trackMarkers();
 
   // Etkileşimler
   window.addEventListener("resize", ()=>{ cancelAnimationFrame(rafId); trackMarkers(); });
@@ -1292,9 +905,6 @@ function onReady(){
   document.getElementById("wwtcanvas").addEventListener("wheel", e => e.preventDefault(), {passive:false});
 }
 
-/* ================================
-   3) LİSTE — arama + odaklan
-================================== */
 function buildList(){
   const list = document.getElementById("list");
   const search = document.getElementById("search");
@@ -1318,26 +928,24 @@ function buildList(){
   search.addEventListener("input", e=>render(e.target.value));
 }
 
-/* ================================
-   4) MARKER (YUVARLAK) — her nesneye ayrı
-================================== */
-const markerMap = new Map(); // id -> button
+
+const markerMap = new Map(); 
 function buildMarkers(){
   OBJECTS.forEach(o=>{
     if(!Number.isFinite(o.ra_hours) || !Number.isFinite(o.dec_deg)) return;
     const b = document.createElement("button");
     b.className="astro-btn"; b.id = `${o.id}btn`; b.title = o.name || o.id;
-    b.addEventListener("click", ()=>focusObject(o));  // tıklayınca pop-out + yakınlaş (M42 davranışı)
+    b.addEventListener("click", ()=>focusObject(o));  
     document.body.appendChild(b);
     markerMap.set(o.id,b);
   });
 }
-/* Sürekli ekran koordinatlarını takip et (M42 tarzı) */
+
 function trackMarkers(){
   function step(){
     markerMap.forEach((btn,id)=>{
       const o = OBJECTS.find(x=>x.id===id); if(!o) return;
-      const pt = wwt.getScreenPointForCoordinates(o.ra_hours, o.dec_deg); // RA(saat), Dec(derece)
+      const pt = wwt.getScreenPointForCoordinates(o.ra_hours, o.dec_deg); 
       if(pt && Number.isFinite(pt.x) && Number.isFinite(pt.y)){
         const w = innerWidth, h = innerHeight, m = 12;
         if(pt.x>m && pt.x<w-m && pt.y>m && pt.y<h-m){
@@ -1350,9 +958,6 @@ function trackMarkers(){
   rafId = requestAnimationFrame(step);
 }
 
-/* ================================
-   5) ODAK + POP-OUT — M42 ile aynı akış
-================================== */
 function focusObject(o){
   if(Number.isFinite(o.ra_hours) && Number.isFinite(o.dec_deg)){
     wwt.gotoRADecZoom(o.ra_hours, o.dec_deg, o.zoom ?? 10, false);
@@ -1365,17 +970,14 @@ function focusObject(o){
   const credit = document.getElementById("credit");
   credit.innerHTML = `
     ${o.credit_text ? o.credit_text : "" }
-    ${o.credit_link ? ` — <a href="${o.credit_link}" target="_blank" rel="noopener">source</a>` : ""}
-    ${o.more_link ? ` — <a href="${o.more_link}" target="_blank" rel="noopener">more</a>` : ""}
+    ${o.credit_link ? ` — <a href="${o.credit_link}" target="_blank" rel="noopener">for more information</a>` : ""}
   `;
   showPopup();
 }
 function showPopup(){ document.getElementById("popup").classList.add("visible"); }
 function hidePopup(){ document.getElementById("popup").classList.remove("visible"); }
 
-/* ================================
-   6) BAŞLAT
-================================== */
+// ${o.more_link ? ` — <a href="${o.more_link}" target="_blank" rel="noopener">test</a>` : ""}
 window.addEventListener("load", initWWT);
 </script>
 </body>
