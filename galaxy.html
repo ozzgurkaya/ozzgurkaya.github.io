@@ -72,6 +72,7 @@ html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 I
 <div class="hud" role="toolbar">
   <h1>Milky Way Galaxy</h1>
   <button id="resetView" title="General View">General View</button>
+  <button id="openPage" title="Open another page">Main Menu</button>
 </div>
 
 <!-- ALT SOL: Nesne listesi -->
@@ -108,7 +109,6 @@ const OBJECTS = [
     tags:["HII","star-forming","Orion"]
   },
 
-  /* ——— YALNIZCA KOORDİNATLAR DÜZELTİLDİ ——— */
   { id:"m8", name:"M8 (Lagoon Nebula)", type:"Nebula",
     ra_hours:18.0603,  dec_deg:-24.383, zoom:10,
     img_url:"https://svs.gsfc.nasa.gov/vis/a030000/a030700/a030775/orion_nebula_vis_ir-hst_sst-3240x3240_print.jpg",
@@ -185,8 +185,6 @@ const OBJECTS = [
     more_link:"https://images.nasa.gov/search?q=NGC%203324%20Cosmic%20Cliffs&media_type=image", tags:["StarForming"] },
 
 
-
-/* === YENİ NESNELER — EKLE/APPEND === */
 {
   id:"ngc3603",
   name:"NGC 3603",
@@ -684,20 +682,7 @@ const OBJECTS = [
   more_link:"https://images.nasa.gov/search?q=RCW%2086&media_type=image",
   tags:["SNR","Historic","FastShocks"]
 },
-{
-  id:"kes75",
-  name:"Kes 75",
-  type:"SNR/PWN",
-  ra_hours:18.773889,   // ~18h46m26s
-  dec_deg:-2.983333,    // ~-02°59′
-  zoom:10,
-  img_url:"",
-  info:"Hosts a young pulsar and wind nebula. X-ray maps trace the central engine; remnant and PWN evolve together.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
-  more_link:"https://images.nasa.gov/search?q=Kes%2075&media_type=image",
-  tags:["SNR","PWN","Pulsar"]
-},
+
 {
   id:"crab_pulsar",
   name:"Crab Pulsar (PSR B0531+21)",
@@ -705,41 +690,14 @@ const OBJECTS = [
   ra_hours:5.575547,    // 05h34m31.97s
   dec_deg:22.014472,    // +22°00′52.1″
   zoom:10,
-  img_url:"",
-  info:"The young neutron star of the 1054 supernova. Chandra and Hubble show its torus and jets; pulses trace rotation energy.",
-  credit_text:"NASA/Chandra/ESA",
-  credit_link:"https://chandra.harvard.edu/photo/2000/0052/",
+  img_url:"https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2002/09/STScI-01EVT97R00XQV02TKSC4W0NWW0.tif?w=2000&h=2000&fit=crop&crop=faces%2Cfocalpoint",
+  info:"The Crab Pulsar (PSR B0531+21) is a rapidly rotating neutron star located at the heart of the Crab Nebula, the remnant of a supernova observed in 1054 CE. It spins about 30 times per second, emitting beams of radiation that sweep across Earth like a cosmic lighthouse, making it one of the most studied pulsars. The Crab Pulsar powers the entire nebula by releasing enormous amounts of energy, producing strong winds and radiation that illuminate the surrounding gas and dust.",
+  credit_text:"NASA/HUBBLE",
+  credit_link:"https://science.nasa.gov/asset/hubble/combined-x-ray-and-optical-images-of-the-crab-nebula/",
   more_link:"https://images.nasa.gov/search?q=Crab%20Pulsar&media_type=image",
   tags:["Pulsar","Jets","Torus"]
 },
-{
-  id:"vela_pulsar",
-  name:"Vela Pulsar",
-  type:"Pulsar",
-  ra_hours:8.588889,    // 08h35m20s
-  dec_deg:-45.100000,   // ~-45°06′
-  zoom:10,
-  img_url:"",
-  info:"A fast spinner inside Vela SNR. X-ray jets and arcs change over time; pulses span broad wavelengths.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/",
-  more_link:"https://images.nasa.gov/search?q=Vela%20Pulsar&media_type=image",
-  tags:["Pulsar","Jets","Variability"]
-},
-{
-  id:"psr_b1509_58",
-  name:"PSR B1509−58",
-  type:"Pulsar",
-  ra_hours:15.231944,   // 15h13m55s
-  dec_deg:-59.133000,   // ~-59°08′
-  zoom:10,
-  img_url:"",
-  info:"A young, energetic pulsar—famous for the ‘cosmic hand’ shape in X-rays. Strong magnetic field sculpts plasma.",
-  credit_text:"NASA/Chandra",
-  credit_link:"https://chandra.harvard.edu/photo/2014/psr1509/",
-  more_link:"https://images.nasa.gov/search?q=PSR%20B1509-58&media_type=image",
-  tags:["Pulsar","Magnetosphere","PWN"]
-},
+
 {
   id:"geminga",
   name:"Geminga",
@@ -747,41 +705,14 @@ const OBJECTS = [
   ra_hours:6.565000,    // ~06h33m54s
   dec_deg:17.766667,    // ~+17°46′
   zoom:10,
-  img_url:"",
-  info:"A faint radio source but bright in gamma/X-rays. NASA data track motion and tails; key isolated pulsar.",
-  credit_text:"NASA",
-  credit_link:"https://www.nasa.gov/",
+  img_url:"https://www.nasa.gov/wp-content/uploads/2023/03/gemina_main-10.jpg",
+  info:"The Geminga pulsar is a nearby isolated neutron star located about 800 light-years away in the constellation Gemini. It is unusual because, unlike most pulsars, it is very faint in radio waves but extremely bright in gamma rays, which is how it was first discovered. Spinning about four times per second, Geminga is believed to be the remnant of a supernova that exploded around 300,000 years ago, and it remains an important object for studying high-energy astrophysics and the life cycles of neutron stars.",
+  credit_text:"NASA/CHANDRA",
+  credit_link:"https://www.nasa.gov/image-article/chandra-images-show-that-geometry-solves-pulsar-puzzle/",
   more_link:"https://images.nasa.gov/search?q=Geminga&media_type=image",
   tags:["Pulsar","GammaRay","ProperMotion"]
 },
-{
-  id:"psr_j0437_4715",
-  name:"PSR J0437−4715",
-  type:"Pulsar",
-  ra_hours:4.621111,    // 04h37m16s
-  dec_deg:-47.250000,   // -47°15′
-  zoom:11,
-  img_url:"",
-  info:"A nearby millisecond pulsar. Timing tests measure mass and GR; X-rays and radio reveal hot polar spots.",
-  credit_text:"NASA",
-  credit_link:"https://www.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=PSR%20J0437-4715&media_type=image",
-  tags:["Pulsar","Millisecond","Timing"]
-},
-{
-  id:"sgr1806_20",
-  name:"SGR 1806−20 (Magnetar)",
-  type:"Magnetar",
-  ra_hours:18.144167,   // 18h08m39s
-  dec_deg:-20.400000,   // -20°24′
-  zoom:11,
-  img_url:"",
-  info:"An extremely magnetic neutron star. Giant flares are major high-energy events; X-ray data show magnetospheric changes.",
-  credit_text:"NASA",
-  credit_link:"https://www.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=SGR%201806-20&media_type=image",
-  tags:["Magnetar","Flares","HighEnergy"]
-},
+
 {
   id:"psr_j1745_2900",
   name:"PSR J1745−2900 (GC Magnetar)",
@@ -789,10 +720,10 @@ const OBJECTS = [
   ra_hours:17.761111,   // 17h45m40s
   dec_deg:-29.008333,   // -29°00′30″
   zoom:11,
-  img_url:"",
-  info:"A magnetar near the Galactic Center. Detected in X-rays despite absorption; linked to the Sgr A* environment.",
-  credit_text:"NASA",
-  credit_link:"https://www.nasa.gov/",
+  img_url:"https://chandra.harvard.edu/photo/2015/sgr1745/sgr1745_525.jpg",
+  info:"PSR J1745−2900, often called the Galactic Center Magnetar, is a rare type of neutron star located just 0.1 light-years from Sagittarius A*, the supermassive black hole at the center of the Milky Way. Discovered in 2013, it is both a pulsar and a magnetar, emitting strong X-ray and radio pulses while possessing an extremely powerful magnetic field. Its close proximity to Sagittarius A* makes it a valuable natural laboratory for studying both magnetars and the extreme environment surrounding our galaxy’s central black hole.",
+  credit_text:"NASA/CHANDRA/HARVARD",
+  credit_link:"https://chandra.harvard.edu/photo/2015/sgr1745/",
   more_link:"https://images.nasa.gov/search?q=PSR%20J1745-2900&media_type=image",
   tags:["Magnetar","GalacticCenter","Absorption"]
 },
@@ -803,41 +734,14 @@ const OBJECTS = [
   ra_hours:18.943056,   // 18h56m35s
   dec_deg:-37.908611,   // -37°54′31″
   zoom:11,
-  img_url:"",
-  info:"A nearby isolated neutron star with a simple spectrum. Surface properties constrain physics; optical/X-ray fit atmosphere models.",
-  credit_text:"NASA",
-  credit_link:"https://www.nasa.gov/",
+  img_url:"https://cdn.esahubble.org/archives/images/screen/opo9732a.jpg",
+  info:"RX J1856.5−3754 is one of the closest known isolated neutron stars to Earth, located about 400 light-years away in the constellation Corona Australis. It does not emit regular radio pulses like typical pulsars, but instead is observed primarily in X-rays, where it appears as a very hot, compact object with a surface temperature of about 700,000 K. Because of its proximity and relative brightness in X-rays, RX J1856.5−3754 is an important object for studying the structure, cooling, and atmosphere of neutron stars.",
+  credit_text:"NASA/ESA",
+  credit_link:"https://esahubble.org/images/opo9732a/",
   more_link:"https://images.nasa.gov/search?q=RX%20J1856.5-3754&media_type=image",
   tags:["NeutronStar","Atmosphere","Nearby"]
 },
-{
-  id:"psr_j0030_0451",
-  name:"PSR J0030+0451",
-  type:"Pulsar",
-  ra_hours:0.507500,    // 00h30m27s
-  dec_deg:4.860833,     // +04°51′39″
-  zoom:11,
-  img_url:"",
-  info:"NICER mapped its surface hot spots. Pulse profiles constrain the neutron star equation of state.",
-  credit_text:"NASA/NICER",
-  credit_link:"https://www.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=PSR%20J0030%2B0451&media_type=image",
-  tags:["Pulsar","NICER","EOS"]
-},
-{
-  id:"psr_j1023_0038",
-  name:"PSR J1023+0038",
-  type:"Pulsar",
-  ra_hours:10.396389,   // 10h23m47s
-  dec_deg:0.644722,     // +00°38′41″
-  zoom:11,
-  img_url:"",
-  info:"A transitional system between rotation-powered and accreting. X-ray and radio vary with state—key for accretion physics.",
-  credit_text:"NASA",
-  credit_link:"https://www.nasa.gov/",
-  more_link:"https://images.nasa.gov/search?q=PSR%20J1023%2B0038&media_type=image",
-  tags:["Transitional","Accretion","Timing"]
-},
+
 {
   id:"betelgeuse",
   name:"Betelgeuse (Alpha Orionis)",
@@ -845,10 +749,10 @@ const OBJECTS = [
   ra_hours:5.919444,    // 05h55m10s
   dec_deg:7.406944,     // +07°24′25″
   zoom:12,
-  img_url:"",
-  info:"A red supergiant with notable brightness changes. Hubble and ground data trace convective cells and dust ejections—key to pre-supernova mass loss.",
+  img_url:"https://cdn.sci.esa.int/documents/34247/35306/1567219406177-i_screenimage_15971.jpg",
+  info:"Betelgeuse (Alpha Orionis) is a red supergiant star located about 640 light-years away in the constellation Orion. It is one of the largest visible stars, with a diameter nearly 1,000 times that of the Sun, and shines with a reddish hue easily visible to the naked eye. Betelgeuse is nearing the end of its life cycle and is expected to explode as a supernova within the next million years, an event that would be visible from Earth even in daylight.",
   credit_text:"NASA/ESA",
-  credit_link:"https://www.nasa.gov/",
+  credit_link:"https://sci.esa.int/web/hubble/-/15971-the-atmosphere-of-betelgeuse",
   more_link:"https://images.nasa.gov/search?q=Betelgeuse&media_type=image",
   tags:["RedSupergiant","Variability","MassLoss"]
 },
@@ -859,15 +763,28 @@ const OBJECTS = [
   ra_hours:5.242222,    // 05h14m32s
   dec_deg:-8.201667,    // -08°12′06″
   zoom:12,
-  img_url:"",
-  info:"A blue supergiant with strong winds. Spectroscopy measures mass-loss rates and atmospheric waves; reflection nebulosity lights its environment.",
-  credit_text:"NASA/ESA",
-  credit_link:"https://www.nasa.gov/",
+  img_url:"https://astropixels.com/stars/images/Rigel-01w.jpg",
+  info:"Rigel (Beta Orionis) is a blue supergiant star located about 860 light-years away in the constellation Orion. It is the brightest star in Orion and one of the most luminous stars visible from Earth, shining with a brightness about 120,000 times that of the Sun. Despite its massive size and intense energy output, Rigel is a relatively young star nearing the end of its life cycle and will eventually explode as a supernova.",
+  credit_text:"NASA/ESA/BRITANNICA",
+  credit_link:"https://www.britannica.com/place/Rigel?utm_source=chatgpt.com",
   more_link:"https://images.nasa.gov/search?q=Rigel%20Beta%20Orionis&media_type=image",
   tags:["BlueSupergiant","Winds","Spectroscopy"]
-}
+},
 
-
+{
+  id:"milky_way",
+  name:"Milky Way (Galactic Center)",
+  type:"Galaxy",
+  ra_hours:17.761111,   // ~17h45m40s (J2000)
+  dec_deg:-29.007778,   // ~-29°00′28″
+  zoom:6,
+  img_url:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Galactic_Cntr_full_cropped.jpg/800px-Galactic_Cntr_full_cropped.jpg",
+  info:"The Milky Way’s Galactic Center is the rotational hub of our galaxy, located about 27,000 light-years away in the direction of the constellation Sagittarius. At its core lies Sagittarius A*, a supermassive black hole with a mass of about 4 million Suns, surrounded by dense star clusters, gas clouds, and high-energy radiation. Because of the dust obscuring our view, it can’t be seen in visible light, but observations in radio, infrared, and X-rays have revealed an energetic and dynamic environment where stars orbit at incredible speeds under the influence of the black hole’s gravity.",
+  credit_text:"NASA/ESA/WIKIPEDIA",
+  credit_link:"https://www.nasa.gov/image-article/galactic-center/",
+  more_link:"https://images.nasa.gov/search?q=Milky%20Way%20galactic%20center&media_type=image",
+  tags:["Galaxy","BarredSpiral","SgrA*","GalacticCenter","OrionSpur"]
+},
 
 ];
 
@@ -891,6 +808,10 @@ function onReady(){
      "set_showCrosshairs"].forEach(fn=>{ if(typeof S[fn]==="function") S[fn](false); });
     if (typeof S.set_galacticMode==="function") S.set_galacticMode(false); // <-- önemli
   }
+
+document.getElementById("openPage").addEventListener("click", ()=>{
+  window.location.href = "home.html";
+});
 
   wwt.gotoRADecZoom(0,0,360,false);
 
@@ -982,3 +903,4 @@ window.addEventListener("load", initWWT);
 </script>
 </body>
 </html>
+
