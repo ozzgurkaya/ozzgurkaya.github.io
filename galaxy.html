@@ -76,15 +76,15 @@ html,body{height:100%;margin:0;background:#000;color:var(--ink);font:15px/1.45 I
 </div>
 
 <!-- ALT SOL: Nesne listesi -->
-<div id="panel" role="region" aria-label="Gök cismi listesi">
+<div id="panel" role="region" aria-label="List of celestial bodies">
   <h2>Object List (click → focus)</h2>
-  <input id="search" type="search" placeholder="Ara: M42, Andromeda, nebula..." />
+  <input id="search" type="search" placeholder="Search: M42, Andromeda, Nebula..." />
   <div id="list"></div>
 </div>
 
 <!-- SAĞ ÜST: Pop-out -->
 <div id="popup" role="dialog" aria-live="polite" aria-modal="false">
-  <button class="close" id="closePopup" aria-label="Kapat">×</button>
+  <button class="close" id="closePopup" aria-label="Close">×</button>
   <h3 id="title">Selected Object</h3>
   <img id="img" alt="Nesne görseli" loading="lazy" />
   <p id="info"></p>
@@ -903,4 +903,5 @@ window.addEventListener("load", initWWT);
 </script>
 </body>
 </html>
+
 
